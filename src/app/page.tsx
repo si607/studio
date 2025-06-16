@@ -418,8 +418,9 @@ export default function PicShineAiPage() {
             </div>
             <div className="md:col-span-2 space-y-2">
                 <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
-                    <p className="font-semibold">Ad Placeholder 1</p>
-                    <p className="text-xs">Your advertisement could be here!</p>
+                    <p className="font-semibold">Advertisement</p>
+                    <p className="text-xs mt-1">Placeholder for AdMob Unit:</p>
+                    <p className="text-xs font-mono">ca-app-pub-2900494836662252/1153507362</p>
                 </div>
                 <Button
                   onClick={handleUpgradePro}
@@ -429,8 +430,9 @@ export default function PicShineAiPage() {
                   <Star className="mr-2 h-5 w-5" /> Upgrade to Pro (Coming Soon)
                 </Button>
                  <div className="bg-gray-100 dark:bg-gray-800 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
-                    <p className="font-semibold">Ad Placeholder 2</p>
-                    <p className="text-xs">Promote your product or service.</p>
+                    <p className="font-semibold">Advertisement</p>
+                    <p className="text-xs mt-1">This is a visual ad placeholder.</p>
+                    <p className="text-xs mt-1">Integrate your ad network here.</p>
                 </div>
             </div>
           </div>
@@ -501,5 +503,3 @@ export default function PicShineAiPage() {
     </main>
   );
 }
-
-    
