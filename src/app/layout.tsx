@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"; 
 
 export const metadata: Metadata = {
-  title: 'PhotoMagic Pro',
-  description: 'Magically enhance your photos with AI power.',
+  title: 'Nostalgia AI',
+  description: 'Restore and enhance your old photos with AI power.',
 };
 
 export default function RootLayout({

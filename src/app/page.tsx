@@ -7,13 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { UploadCloud, Wand2, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle } from 'lucide-react';
+import { UploadCloud, Wand2, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
+import { removeScratches } from '@/ai/flows/remove-scratches'; // New import
 
 const DAILY_LIMIT = 30;
+const HISTORY_LIMIT = 5;
+const WARNING_THRESHOLD = 5; // Show warning when 5 enhancements are left
 
-export default function PhotoMagicProPage() {
+interface HistoryItem {
+  id: string;
+  originalImage: string;
+  enhancedImage: string;
+  operation: string;
+  timestamp: number;
+  fileName?: string;
+}
+
+export default function NostalgiaAiPage() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,22 +37,48 @@ export default function PhotoMagicProPage() {
 
   const [usageCount, setUsageCount] = useState(0);
   const [showLimitPopup, setShowLimitPopup] = useState(false);
+  const [userHistory, setUserHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    const storedUsage = localStorage.getItem('photoMagicProUsage');
+    const storedUsage = localStorage.getItem('nostalgiaAiUsage');
     if (storedUsage) {
       const { date, count } = JSON.parse(storedUsage);
       if (date === today) {
         setUsageCount(count);
       } else {
-        localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: 0 }));
+        localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
     } else {
-      localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: 0 }));
+      localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: 0 }));
+    }
+
+    const storedHistory = localStorage.getItem('nostalgiaAiHistory');
+    if (storedHistory) {
+      setUserHistory(JSON.parse(storedHistory));
     }
   }, []);
+
+  const updateLocalStorageHistory = (newHistory: HistoryItem[]) => {
+    localStorage.setItem('nostalgiaAiHistory', JSON.stringify(newHistory));
+  };
+
+  const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
+    const newItem: HistoryItem = {
+      id: Date.now().toString(),
+      originalImage: original,
+      enhancedImage: enhanced,
+      operation,
+      timestamp: Date.now(),
+      fileName: currentFileName || undefined,
+    };
+    setUserHistory(prevHistory => {
+      const updatedHistory = [newItem, ...prevHistory].slice(0, HISTORY_LIMIT);
+      updateLocalStorageHistory(updatedHistory);
+      return updatedHistory;
+    });
+  };
 
   const checkAndIncrementUsage = (): boolean => {
     if (usageCount >= DAILY_LIMIT) {
@@ -50,7 +88,15 @@ export default function PhotoMagicProPage() {
     const newCount = usageCount + 1;
     setUsageCount(newCount);
     const today = new Date().toISOString().split('T')[0];
-    localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: newCount }));
+    localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: newCount }));
+
+    if (DAILY_LIMIT - newCount === WARNING_THRESHOLD) {
+      toast({
+        title: "Usage Warning",
+        description: `You have ${WARNING_THRESHOLD} enhancements left for today.`,
+        variant: "default", 
+      });
+    }
     return true;
   };
 
@@ -111,7 +157,11 @@ export default function PhotoMagicProPage() {
     }
   };
 
-  const performEnhancement = async (enhancementFn: (input: { photoDataUri: string }) => Promise<{ enhancedPhotoDataUri: string }>, operationName: string, loadingText: string) => {
+  const performEnhancement = async (
+    enhancementFn: (input: { photoDataUri: string }) => Promise<{ enhancedPhotoDataUri: string }>,
+    operationName: string,
+    loadingText: string
+  ) => {
     if (!originalImage) {
       toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
@@ -123,6 +173,7 @@ export default function PhotoMagicProPage() {
     try {
       const result = await enhancementFn({ photoDataUri: originalImage });
       setEnhancedImage(result.enhancedPhotoDataUri);
+      addHistoryItem(originalImage, result.enhancedPhotoDataUri, operationName, fileName);
       toast({
         title: `Image ${operationName}!`,
         description: `Your image has been successfully ${operationName.toLowerCase()}.`,
@@ -130,7 +181,9 @@ export default function PhotoMagicProPage() {
     } catch (error) {
       console.error(`Error ${operationName.toLowerCase()} image:`, error);
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
-      if (error instanceof Error) {
+      if (error instanceof Error && error.message.includes("blocked")) {
+        errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive" });
@@ -141,11 +194,15 @@ export default function PhotoMagicProPage() {
   };
 
   const handleSmartEnhance = () => {
-    performEnhancement(smartEnhanceImage, "Smart Enhanced", "Applying smart enhancements...");
+    performEnhancement(smartEnhanceImage, "Smart Enhanced", "Applying smart enhancements & upscaling...");
   };
 
   const handleColorize = () => {
     performEnhancement(colorizeImage, "Colorized", "Colorizing your image...");
+  };
+
+  const handleRemoveScratches = () => {
+    performEnhancement(removeScratches, "Scratches Removed", "Removing scratches from your image...");
   };
 
   const handleReset = () => {
@@ -164,7 +221,7 @@ export default function PhotoMagicProPage() {
     }
     const link = document.createElement('a');
     link.href = enhancedImage;
-    link.download = `enhanced-${fileName || 'image.png'}`;
+    link.download = `nostalgia-ai-${fileName ? fileName.split('.')[0] : 'enhanced'}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -176,6 +233,13 @@ export default function PhotoMagicProPage() {
       title: "Upgrade to Pro!",
       description: "Premium features like unlimited usage, no watermarks, and high-quality export are coming soon!",
     });
+  };
+
+  const loadFromHistory = (item: HistoryItem) => {
+    setOriginalImage(item.originalImage);
+    setEnhancedImage(item.enhancedImage);
+    setFileName(item.fileName || `history_image_${item.id}.png`);
+     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint }: { src: string | null, alt: string, placeholderText: string, 'data-ai-hint'?: string }) => (
@@ -191,16 +255,17 @@ export default function PhotoMagicProPage() {
     </div>
   );
 
+
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-background p-4 sm:p-6 md:p-8 font-body">
       <Card className="w-full max-w-5xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
         <CardHeader className="text-center bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-6 sm:p-8">
           <div className="flex items-center justify-center mb-2">
             <Wand2 size={32} className="mr-3 sm:size-40" /> 
-            <CardTitle className="text-2xl sm:text-3xl font-headline">PhotoMagic Pro</CardTitle>
+            <CardTitle className="text-2xl sm:text-3xl font-headline">Nostalgia AI</CardTitle>
           </div>
           <CardDescription className="text-primary-foreground/90 text-sm sm:text-base">
-            Upload your image and let our AI magically enhance its quality or add vibrant colors.
+            Breathe new life into your old photos. Upload an image to restore, enhance, and colorize it with AI.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 md:p-10 space-y-8">
@@ -235,50 +300,59 @@ export default function PhotoMagicProPage() {
                 </div>
               )}
             
-              <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 pt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-4">
                 <Button
                   onClick={handleSmartEnhance}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
-                  aria-label="Smart enhance uploaded image"
+                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
+                  aria-label="Smart enhance and upscale uploaded image"
                 >
-                  {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
+                  {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Star className="mr-2 h-5 w-5" />}
                   Smart Enhance
                 </Button>
                 <Button
                   onClick={handleColorize}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:opacity-90"
+                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:opacity-90"
                   aria-label="Colorize uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Colorizing") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Palette className="mr-2 h-5 w-5" />}
                   Auto Colorize
                 </Button>
+                 <Button
+                  onClick={handleRemoveScratches}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:opacity-90"
+                  aria-label="Remove scratches from uploaded image"
+                >
+                  {isLoading && loadingMessage.includes("Removing scratches") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Brush className="mr-2 h-5 w-5" />}
+                  Remove Scratches
+                </Button>
                 <Button
                   onClick={handleDownload}
                   disabled={!enhancedImage || isLoading}
-                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-green-500 text-white hover:bg-green-600"
+                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-green-500 text-white hover:bg-green-600"
                   aria-label="Download enhanced image"
                 >
                   <Download className="mr-2 h-5 w-5" /> Download
                 </Button>
-                <Button
+              </div>
+               <Button
                   onClick={handleReset}
                   variant="outline"
-                  disabled={isLoading || !originalImage}
-                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-foreground/50 text-foreground hover:bg-accent/20"
+                  disabled={isLoading || (!originalImage && !enhancedImage)}
+                  className="w-full text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-foreground/50 text-foreground hover:bg-accent/20 mt-3"
                   aria-label="Reset images and selection"
                 >
-                  <RotateCcw className="mr-2 h-5 w-5" /> Reset
+                  <RotateCcw className="mr-2 h-5 w-5" /> Reset All
                 </Button>
-              </div>
-              <p className="text-xs text-center text-muted-foreground pt-2">Daily usage: {usageCount}/{DAILY_LIMIT} enhancements remaining.</p>
+              <p className="text-xs text-center text-muted-foreground pt-2">Daily enhancements remaining: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
 
             </div>
             <div className="md:col-span-2 space-y-2">
                 <div className="bg-gray-100 p-3 rounded-lg text-center text-sm text-gray-600 shadow">
-                    <p>Simulated Ad Banner</p>
-                    <p className="text-xs">Your Ad Here!</p>
+                    <p className="font-semibold">Ad Placeholder 1</p>
+                    <p className="text-xs">Your advertisement could be here!</p>
                 </div>
                 <Button
                   onClick={handleUpgradePro}
@@ -288,8 +362,8 @@ export default function PhotoMagicProPage() {
                   <Star className="mr-2 h-5 w-5" /> Upgrade to Pro (Coming Soon)
                 </Button>
                  <div className="bg-gray-100 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 shadow">
-                    <p>Another Simulated Ad</p>
-                    <p className="text-xs">More Ad Space!</p>
+                    <p className="font-semibold">Ad Placeholder 2</p>
+                    <p className="text-xs">Promote your product or service.</p>
                 </div>
             </div>
           </div>
@@ -297,18 +371,45 @@ export default function PhotoMagicProPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-8">
             <div className="space-y-3">
               <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Original Image</h3>
-              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." data-ai-hint="uploaded image" />
+              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." data-ai-hint="uploaded old photo" />
             </div>
             <div className="space-y-3">
               <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Enhanced Image</h3>
-              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="enhanced image" />
+              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="restored photo" />
             </div>
           </div>
+
+          {userHistory.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-border">
+              <h3 className="text-xl sm:text-2xl font-headline text-center text-foreground mb-6 flex items-center justify-center">
+                <HistoryIcon className="mr-3 h-6 w-6 text-primary" /> Your Recent Enhancements
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                {userHistory.map((item) => (
+                  <Card 
+                    key={item.id} 
+                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 group"
+                    onClick={() => loadFromHistory(item)}
+                    title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
+                  >
+                    <div className="aspect-square bg-muted/30 flex items-center justify-center relative">
+                      <img src={item.enhancedImage} alt={`Enhanced ${item.operation}`} className="max-h-full max-w-full object-contain" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center text-white p-2 text-center">
+                        <p className="text-xs font-semibold">{item.operation}</p>
+                        {item.fileName && <p className="text-[10px] truncate w-full">{item.fileName}</p>}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
         </CardContent>
       </Card>
       <footer className="text-center py-8 text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} PhotoMagic Pro. All rights reserved.</p>
-        <p>Powered by Genkit AI.</p>
+        <p>&copy; {new Date().getFullYear()} Nostalgia AI. All rights reserved.</p>
+        <p>Powered by Genkit & Google AI. For inquiries, contact: support@nostalgia-ai.app</p>
       </footer>
 
       <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>
