@@ -7,10 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { UploadCloud, Wand2, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
-import { removeScratches } from '@/ai/flows/remove-scratches'; // New import
+import { removeScratches } from '@/ai/flows/remove-scratches';
 
 const DAILY_LIMIT = 30;
 const HISTORY_LIMIT = 5;
@@ -25,7 +25,7 @@ interface HistoryItem {
   fileName?: string;
 }
 
-export default function NostalgiaAiPage() {
+export default function PicShineAiPage() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,27 +41,27 @@ export default function NostalgiaAiPage() {
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    const storedUsage = localStorage.getItem('nostalgiaAiUsage');
+    const storedUsage = localStorage.getItem('picShineAiUsage');
     if (storedUsage) {
       const { date, count } = JSON.parse(storedUsage);
       if (date === today) {
         setUsageCount(count);
       } else {
-        localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: 0 }));
+        localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
     } else {
-      localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: 0 }));
+      localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
     }
 
-    const storedHistory = localStorage.getItem('nostalgiaAiHistory');
+    const storedHistory = localStorage.getItem('picShineAiHistory');
     if (storedHistory) {
       setUserHistory(JSON.parse(storedHistory));
     }
   }, []);
 
   const updateLocalStorageHistory = (newHistory: HistoryItem[]) => {
-    localStorage.setItem('nostalgiaAiHistory', JSON.stringify(newHistory));
+    localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
   };
 
   const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
@@ -88,7 +88,7 @@ export default function NostalgiaAiPage() {
     const newCount = usageCount + 1;
     setUsageCount(newCount);
     const today = new Date().toISOString().split('T')[0];
-    localStorage.setItem('nostalgiaAiUsage', JSON.stringify({ date: today, count: newCount }));
+    localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: newCount }));
 
     if (DAILY_LIMIT - newCount === WARNING_THRESHOLD) {
       toast({
@@ -221,7 +221,7 @@ export default function NostalgiaAiPage() {
     }
     const link = document.createElement('a');
     link.href = enhancedImage;
-    link.download = `nostalgia-ai-${fileName ? fileName.split('.')[0] : 'enhanced'}.png`;
+    link.download = `picshine-ai-${fileName ? fileName.split('.')[0] : 'enhanced'}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -261,11 +261,11 @@ export default function NostalgiaAiPage() {
       <Card className="w-full max-w-5xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
         <CardHeader className="text-center bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-6 sm:p-8">
           <div className="flex items-center justify-center mb-2">
-            <Wand2 size={32} className="mr-3 sm:size-40" /> 
-            <CardTitle className="text-2xl sm:text-3xl font-headline">Nostalgia AI</CardTitle>
+            <Sparkles size={36} className="mr-3" /> 
+            <CardTitle className="text-2xl sm:text-3xl font-headline">PicShine AI</CardTitle>
           </div>
           <CardDescription className="text-primary-foreground/90 text-sm sm:text-base">
-            Breathe new life into your old photos. Upload an image to restore, enhance, and colorize it with AI.
+            Make your photos shine! Enhance, restore, and colorize with the power of AI.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 md:p-10 space-y-8">
@@ -408,8 +408,8 @@ export default function NostalgiaAiPage() {
         </CardContent>
       </Card>
       <footer className="text-center py-8 text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} Nostalgia AI. All rights reserved.</p>
-        <p>Powered by Genkit & Google AI. For inquiries, contact: support@nostalgia-ai.app</p>
+        <p>&copy; {new Date().getFullYear()} PicShine AI. All rights reserved.</p>
+        <p>Powered by Genkit & Google AI. For inquiries, contact: support@picshine-ai.app</p>
       </footer>
 
       <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>

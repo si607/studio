@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"; 
 
 export const metadata: Metadata = {
-  title: 'Nostalgia AI',
-  description: 'Restore and enhance your old photos with AI power.',
+  title: 'PicShine AI',
+  description: 'Make your photos shine! Enhance, restore, and colorize with PicShine AI.',
 };
 
 export default function RootLayout({
