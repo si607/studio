@@ -74,32 +74,46 @@ export default function PicShineAiPage() {
 
   const updateLocalStorageHistory = (newHistory: HistoryItem[]) => {
     try {
+      // Attempt to save the potentially full new history (up to HISTORY_LIMIT items)
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
-        console.error("Error saving history to localStorage (likely quota exceeded):", error);
-        toast({
-            title: "History Save Error",
-            description: "Could not save the full history. Older items might be removed.",
-            variant: "destructive",
-        });
-        // If quota is exceeded, try saving a smaller history (e.g., just the latest item)
-        // This is a fallback, the main fix is reducing data per item.
+      // This block executes if the above setItem fails (e.g., quota exceeded)
+      console.error("Error saving full history to localStorage (quota likely exceeded):", error);
+      toast({
+        title: "History Save Warning",
+        description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
+        variant: "default", 
+      });
+
+      // Fallback: Try to save only the most recent item from the newHistory array
+      try {
         if (newHistory.length > 0) {
-            try {
-                localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory.slice(0,1)));
-            } catch (e) {
-                console.error("Still failed to save even a single history item:", e);
-            }
+          // Ensure we are trying to save an array containing only the first (latest) item
+          localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
+        } else {
+          // If newHistory was somehow empty (defensive coding, should not happen with current addHistoryItem logic)
+          localStorage.setItem('picShineAiHistory', JSON.stringify([]));
         }
+      } catch (fallbackError) {
+        // This block executes if even saving a single item fails
+        console.error("Error saving even the latest history item to localStorage:", fallbackError);
+        toast({
+          title: "History Save Failed",
+          description: "Unable to save any enhancement history due to critical browser storage limits. Your current session's history is in memory but won't persist across sessions.",
+          variant: "destructive",
+        });
+        // At this point, localStorage is likely full or unusable for this key.
+        // The userHistory state in React still holds the history for the current session.
+      }
     }
   };
 
   const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
-    if (!original) return; // Do not add to history if original image is not set
+    if (!originalImage) return; // Do not add to history if original image is not set (using originalImage state for check)
 
     const newItem: HistoryItem = {
       id: Date.now().toString(),
-      // originalImage field removed from here
+      // originalImage field removed
       enhancedImage: enhanced,
       operation,
       timestamp: Date.now(),
@@ -488,4 +502,4 @@ export default function PicShineAiPage() {
   );
 }
 
-
+    
