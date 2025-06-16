@@ -49,7 +49,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
-         safetySettings: [ // Added safety settings to be less restrictive for typical photo enhancements
+         safetySettings: [ 
           { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
           { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
@@ -58,7 +58,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
       },
     });
     if (!media?.url) {
-      throw new Error('AI model did not return an image. The content might have been blocked due to safety settings or other issues.');
+      throw new Error('AI model did not return an image. The content might have been blocked or the model failed to produce an image.');
     }
     return {enhancedPhotoDataUri: media.url};
   }

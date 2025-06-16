@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -12,7 +13,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
-        code: ['monospace', 'monospace'], // Added monospace fallback
+        code: ['monospace', 'monospace'], 
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -26,8 +27,8 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: 'hsl(var(--primary))', // Soft Lavender
+          foreground: 'hsl(var(--primary-foreground))', // Dark Purple text on Soft Lavender
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -38,8 +39,8 @@ export default {
           foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT: 'hsl(var(--accent))', // Pale Violet
+          foreground: 'hsl(var(--accent-foreground))', // Dark Purple text on Pale Violet
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',

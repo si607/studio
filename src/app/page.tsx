@@ -1,33 +1,65 @@
 
 "use client";
 
-import React, { useState, ChangeEvent, useRef } from 'react';
+import React, { useState, ChangeEvent, useRef, useEffect, DragEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { UploadCloud, Wand2, RotateCcw, Loader2, Image as ImageIcon, Lightbulb } from 'lucide-react';
-import { enhanceImage } from '@/ai/flows/enhance-image';
-import { suggestImprovements } from '@/ai/flows/suggest-improvements';
-import NextImage from 'next/image'; // Using NextImage for optimized images where appropriate
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { UploadCloud, Wand2, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle } from 'lucide-react';
+import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
+import { colorizeImage } from '@/ai/flows/colorize-image';
 
-export default function ImageEnhancerPage() {
+const DAILY_LIMIT = 30;
+
+export default function PhotoMagicProPage() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [fileName, setFileName] = useState<string | null>(null);
-  const [improvementSuggestions, setImprovementSuggestions] = useState<string[] | null>(null);
-  const [isSuggesting, setIsSuggesting] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const [usageCount, setUsageCount] = useState(0);
+  const [showLimitPopup, setShowLimitPopup] = useState(false);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const storedUsage = localStorage.getItem('photoMagicProUsage');
+    if (storedUsage) {
+      const { date, count } = JSON.parse(storedUsage);
+      if (date === today) {
+        setUsageCount(count);
+      } else {
+        localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: 0 }));
+        setUsageCount(0);
+      }
+    } else {
+      localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: 0 }));
+    }
+  }, []);
+
+  const checkAndIncrementUsage = (): boolean => {
+    if (usageCount >= DAILY_LIMIT) {
+      setShowLimitPopup(true);
+      return false;
+    }
+    const newCount = usageCount + 1;
+    setUsageCount(newCount);
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('photoMagicProUsage', JSON.stringify({ date: today, count: newCount }));
+    return true;
+  };
+
+  const handleImageUpload = (file: File | null) => {
     if (file) {
       if (!file.type.startsWith('image/')) {
         toast({
           title: "Invalid File Type",
-          description: "Please upload a valid image file (e.g., PNG, JPG, GIF).",
+          description: "Please upload a valid image file (e.g., PNG, JPG, GIF, WEBP).",
           variant: "destructive",
         });
         if (fileInputRef.current) {
@@ -41,7 +73,6 @@ export default function ImageEnhancerPage() {
       reader.onloadend = () => {
         setOriginalImage(reader.result as string);
         setEnhancedImage(null); 
-        setImprovementSuggestions(null); // Reset suggestions on new upload
       };
       reader.onerror = () => {
         toast({
@@ -54,96 +85,103 @@ export default function ImageEnhancerPage() {
     }
   };
 
-  const handleEnhanceImage = async () => {
-    if (!originalImage) {
-      toast({
-        title: "No Image",
-        description: "Please upload an image first.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    handleImageUpload(event.target.files?.[0] || null);
+  };
 
-    setIsLoading(true);
-    try {
-      const result = await enhanceImage({ photoDataUri: originalImage });
-      setEnhancedImage(result.enhancedPhotoDataUri);
-      toast({
-        title: "Image Enhanced!",
-        description: "Your image has been successfully enhanced.",
-      });
-    } catch (error) {
-      console.error("Error enhancing image:", error);
-      let errorMessage = "Could not enhance the image. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
+  const handleDragOver = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+       if (fileInputRef.current) {
+        fileInputRef.current.files = event.dataTransfer.files;
       }
-      toast({
-        title: "Enhancement Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleSuggestImprovements = async () => {
+  const performEnhancement = async (enhancementFn: (input: { photoDataUri: string }) => Promise<{ enhancedPhotoDataUri: string }>, operationName: string, loadingText: string) => {
     if (!originalImage) {
-      toast({
-        title: "No Image",
-        description: "Please upload an image first to get suggestions.",
-        variant: "destructive",
-      });
+      toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
       return;
     }
+    if (!checkAndIncrementUsage()) return;
 
-    setIsSuggesting(true);
-    setImprovementSuggestions(null); 
+    setIsLoading(true);
+    setLoadingMessage(loadingText);
     try {
-      const result = await suggestImprovements({ photoDataUri: originalImage });
-      setImprovementSuggestions(result.suggestedImprovements);
-      if (result.suggestedImprovements.length > 0) {
-        toast({
-          title: "Suggestions Ready!",
-          description: "AI has provided some improvement ideas.",
-        });
-      } else {
-        toast({
-          title: "No Specific Suggestions",
-          description: "The AI couldn't find specific improvement suggestions for this image.",
-        });
-      }
+      const result = await enhancementFn({ photoDataUri: originalImage });
+      setEnhancedImage(result.enhancedPhotoDataUri);
+      toast({
+        title: `Image ${operationName}!`,
+        description: `Your image has been successfully ${operationName.toLowerCase()}.`,
+      });
     } catch (error) {
-      console.error("Error suggesting improvements:", error);
-      let errorMessage = "Could not get suggestions. Please try again.";
+      console.error(`Error ${operationName.toLowerCase()} image:`, error);
+      let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      toast({
-        title: "Suggestion Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive" });
     } finally {
-      setIsSuggesting(false);
+      setIsLoading(false);
+      setLoadingMessage('');
     }
+  };
+
+  const handleSmartEnhance = () => {
+    performEnhancement(smartEnhanceImage, "Smart Enhanced", "Applying smart enhancements...");
+  };
+
+  const handleColorize = () => {
+    performEnhancement(colorizeImage, "Colorized", "Colorizing your image...");
   };
 
   const handleReset = () => {
     setOriginalImage(null);
     setEnhancedImage(null);
     setFileName(null);
-    setImprovementSuggestions(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = ""; 
     }
   };
 
-  const ImageDisplay = ({ src, alt, placeholderText }: { src: string | null, alt: string, placeholderText: string }) => (
+  const handleDownload = () => {
+    if (!enhancedImage) {
+      toast({ title: "No Enhanced Image", description: "Enhance an image first to download.", variant: "destructive" });
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = enhancedImage;
+    link.download = `enhanced-${fileName || 'image.png'}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({ title: "Download Started", description: "Your enhanced image is downloading." });
+  };
+
+  const handleUpgradePro = () => {
+    toast({
+      title: "Upgrade to Pro!",
+      description: "Premium features like unlimited usage, no watermarks, and high-quality export are coming soon!",
+    });
+  };
+
+  const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint }: { src: string | null, alt: string, placeholderText: string, 'data-ai-hint'?: string }) => (
     <div className="aspect-video bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden border border-border shadow-sm transition-all duration-300 hover:shadow-md">
       {src ? (
-        <img src={src} alt={alt} className="max-h-full max-w-full object-contain p-1" />
+        <img src={src} alt={alt} className="max-h-full max-w-full object-contain p-1" data-ai-hint={aiHint} />
       ) : (
         <div className="flex flex-col items-center text-muted-foreground p-4 text-center">
           <ImageIcon size={48} className="mb-2 opacity-50" />
@@ -155,135 +193,143 @@ export default function ImageEnhancerPage() {
 
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-background p-4 sm:p-6 md:p-8 font-body">
-      <Card className="w-full max-w-4xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
-        <CardHeader className="text-center bg-primary text-primary-foreground p-6 sm:p-8">
+      <Card className="w-full max-w-5xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
+        <CardHeader className="text-center bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-6 sm:p-8">
           <div className="flex items-center justify-center mb-2">
             <Wand2 size={32} className="mr-3 sm:size-40" /> 
-            <CardTitle className="text-2xl sm:text-3xl font-headline">Remini AI Enhanced</CardTitle>
+            <CardTitle className="text-2xl sm:text-3xl font-headline">PhotoMagic Pro</CardTitle>
           </div>
           <CardDescription className="text-primary-foreground/90 text-sm sm:text-base">
-            Upload your image and let our AI magically enhance its quality or suggest improvements.
+            Upload your image and let our AI magically enhance its quality or add vibrant colors.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 md:p-10 space-y-8">
-          <div className="space-y-4">
-            <label
-              htmlFor="imageUpload"
-              className="flex flex-col items-center justify-center w-full h-48 sm:h-56 border-2 border-dashed border-accent rounded-lg cursor-pointer bg-card hover:bg-accent/10 transition-colors duration-200"
-              aria-busy={isLoading || isSuggesting}
-              aria-disabled={isLoading || isSuggesting}
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 mb-3 text-muted-foreground" />
-                <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground">PNG, JPG, GIF, WEBP</p>
-                {fileName && !isLoading && !isSuggesting && <p className="text-xs text-primary-foreground/80 mt-2 bg-accent/50 px-2 py-1 rounded">Selected: {fileName}</p>}
-                {(isLoading || isSuggesting) && <p className="text-xs text-primary-foreground/80 mt-2">Processing: {fileName}</p>}
-              </div>
-              <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleImageUpload} ref={fileInputRef} disabled={isLoading || isSuggesting} />
-            </label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="md:col-span-3 space-y-4">
+              <label
+                htmlFor="imageUpload"
+                className={`flex flex-col items-center justify-center w-full h-48 sm:h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent/10 transition-colors duration-200 ${isDragging ? 'border-primary ring-2 ring-primary' : 'border-accent'}`}
+                aria-busy={isLoading}
+                aria-disabled={isLoading}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 mb-3 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF, WEBP (Max 5MB)</p>
+                  {fileName && !isLoading && <p className="text-xs text-primary-foreground/80 mt-2 bg-accent/50 px-2 py-1 rounded">Selected: {fileName}</p>}
+                  {isLoading && <p className="text-xs text-primary-foreground/80 mt-2">Processing: {fileName}</p>}
+                </div>
+                <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
+              </label>
 
-            {isLoading && (
-              <div className="flex flex-col items-center justify-center space-y-3 p-4">
-                <Loader2 className="h-10 w-10 sm:h-12 sm:h-12 animate-spin text-primary-foreground" />
-                <p className="text-sm text-center text-muted-foreground">Enhancing your image, please wait...</p>
+              {isLoading && (
+                <div className="flex flex-col items-center justify-center space-y-3 p-4">
+                  <Loader2 className="h-10 w-10 sm:h-12 sm:h-12 animate-spin text-primary" />
+                  <p className="text-sm text-center text-muted-foreground">{loadingMessage}</p>
+                </div>
+              )}
+            
+              <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-3 pt-4">
+                <Button
+                  onClick={handleSmartEnhance}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
+                  aria-label="Smart enhance uploaded image"
+                >
+                  {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
+                  Smart Enhance
+                </Button>
+                <Button
+                  onClick={handleColorize}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:opacity-90"
+                  aria-label="Colorize uploaded image"
+                >
+                  {isLoading && loadingMessage.includes("Colorizing") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Palette className="mr-2 h-5 w-5" />}
+                  Auto Colorize
+                </Button>
+                <Button
+                  onClick={handleDownload}
+                  disabled={!enhancedImage || isLoading}
+                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-green-500 text-white hover:bg-green-600"
+                  aria-label="Download enhanced image"
+                >
+                  <Download className="mr-2 h-5 w-5" /> Download
+                </Button>
+                <Button
+                  onClick={handleReset}
+                  variant="outline"
+                  disabled={isLoading || !originalImage}
+                  className="w-full sm:w-auto text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-foreground/50 text-foreground hover:bg-accent/20"
+                  aria-label="Reset images and selection"
+                >
+                  <RotateCcw className="mr-2 h-5 w-5" /> Reset
+                </Button>
               </div>
-            )}
+              <p className="text-xs text-center text-muted-foreground pt-2">Daily usage: {usageCount}/{DAILY_LIMIT} enhancements remaining.</p>
+
+            </div>
+            <div className="md:col-span-2 space-y-2">
+                <div className="bg-gray-100 p-3 rounded-lg text-center text-sm text-gray-600 shadow">
+                    <p>Simulated Ad Banner</p>
+                    <p className="text-xs">Your Ad Here!</p>
+                </div>
+                <Button
+                  onClick={handleUpgradePro}
+                  className="w-full text-base px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white"
+                  aria-label="Upgrade to Pro"
+                >
+                  <Star className="mr-2 h-5 w-5" /> Upgrade to Pro (Coming Soon)
+                </Button>
+                 <div className="bg-gray-100 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 shadow">
+                    <p>Another Simulated Ad</p>
+                    <p className="text-xs">More Ad Space!</p>
+                </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-8">
             <div className="space-y-3">
               <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Original Image</h3>
-              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." />
+              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." data-ai-hint="uploaded image" />
             </div>
             <div className="space-y-3">
               <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Enhanced Image</h3>
-              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." />
+              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="enhanced image" />
             </div>
           </div>
-          
-          {isSuggesting && !improvementSuggestions && (
-            <div className="flex flex-col items-center justify-center space-y-3 p-4 mt-6">
-              <Loader2 className="h-10 w-10 sm:h-12 sm:h-12 animate-spin text-primary-foreground" />
-              <p className="text-sm text-center text-muted-foreground">Getting AI suggestions...</p>
-            </div>
-          )}
-
-          {improvementSuggestions && improvementSuggestions.length > 0 && (
-            <Card className="mt-8 w-full shadow-lg rounded-lg">
-              <CardHeader className="bg-secondary">
-                <CardTitle className="flex items-center text-xl text-secondary-foreground">
-                  <Lightbulb className="mr-2 h-6 w-6" />
-                  AI Improvement Suggestions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 pt-4">
-                <ul className="list-disc list-inside space-y-2 text-foreground">
-                  {improvementSuggestions.map((suggestion, index) => (
-                    <li key={index}>{suggestion}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {improvementSuggestions && improvementSuggestions.length === 0 && !isSuggesting && (
-            <Card className="mt-8 w-full shadow-lg rounded-lg">
-              <CardHeader className="bg-secondary">
-                  <CardTitle className="flex items-center text-xl text-secondary-foreground">
-                      <Lightbulb className="mr-2 h-6 w-6" />
-                      AI Improvement Suggestions
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 pt-4">
-                  <p className="text-muted-foreground">The AI did not have specific improvement suggestions for this image.</p>
-              </CardContent>
-            </Card>
-          )}
-
-
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
-            <Button
-              onClick={handleEnhanceImage}
-              disabled={!originalImage || isLoading || isSuggesting}
-              className="w-full sm:w-auto text-base px-6 py-3 sm:px-8 sm:py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-primary-foreground text-primary hover:bg-opacity-90"
-              aria-label="Enhance uploaded image"
-            >
-              {isLoading && !isSuggesting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
-               Enhance Image
-            </Button>
-            <Button
-              onClick={handleSuggestImprovements}
-              disabled={!originalImage || isLoading || isSuggesting}
-              className="w-full sm:w-auto text-base px-6 py-3 sm:px-8 sm:py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-accent text-accent-foreground hover:bg-accent/90"
-              aria-label="Suggest improvements for uploaded image"
-            >
-              {isSuggesting ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Lightbulb className="mr-2 h-5 w-5" />
-              )}
-              Suggest Improvements
-            </Button>
-            <Button
-              onClick={handleReset}
-              variant="outline"
-              disabled={isLoading || isSuggesting || (!originalImage && !enhancedImage && (!improvementSuggestions || improvementSuggestions.length === 0))}
-              className="w-full sm:w-auto text-base px-6 py-3 sm:px-8 sm:py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-primary-foreground/50 text-primary-foreground hover:bg-accent/20"
-              aria-label="Reset images and selection"
-            >
-              <RotateCcw className="mr-2 h-5 w-5" /> Reset
-            </Button>
-          </div>
-
         </CardContent>
       </Card>
       <footer className="text-center py-8 text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} Remini AI Enhanced. All rights reserved.</p>
-        <p>Powered by cutting-edge AI technology.</p>
+        <p>&copy; {new Date().getFullYear()} PhotoMagic Pro. All rights reserved.</p>
+        <p>Powered by Genkit AI.</p>
       </footer>
+
+      <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center">
+              <AlertTriangle className="mr-2 h-6 w-6 text-yellow-500" />
+              Daily Limit Reached
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You have reached your daily limit of {DAILY_LIMIT} free photo enhancements. Please come back tomorrow or consider upgrading to Pro for unlimited access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowLimitPopup(false)}>Got it</AlertDialogAction>
+            <Button onClick={handleUpgradePro} className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white">
+                <Star className="mr-2 h-4 w-4" /> Upgrade to Pro
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

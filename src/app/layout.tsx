@@ -1,10 +1,11 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"; // Added Toaster import
+import { Toaster } from "@/components/ui/toaster"; 
 
 export const metadata: Metadata = {
-  title: 'Remini AI Enhanced',
-  description: 'Enhance your images with AI power.',
+  title: 'PhotoMagic Pro',
+  description: 'Magically enhance your photos with AI power.',
 };
 
 export default function RootLayout({
