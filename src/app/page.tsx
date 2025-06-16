@@ -18,7 +18,7 @@ const WARNING_THRESHOLD = 5; // Show warning when 5 enhancements are left
 
 interface HistoryItem {
   id: string;
-  originalImage: string;
+  // originalImage: string; // Removed to save localStorage space
   enhancedImage: string;
   operation: string;
   timestamp: number;
@@ -56,18 +56,50 @@ export default function PicShineAiPage() {
 
     const storedHistory = localStorage.getItem('picShineAiHistory');
     if (storedHistory) {
-      setUserHistory(JSON.parse(storedHistory));
+      try {
+        const parsedHistory = JSON.parse(storedHistory);
+        if (Array.isArray(parsedHistory)) {
+            setUserHistory(parsedHistory);
+        } else {
+            setUserHistory([]);
+            localStorage.removeItem('picShineAiHistory'); // Clear invalid history
+        }
+      } catch (error) {
+        console.error("Failed to parse history from localStorage", error);
+        setUserHistory([]);
+        localStorage.removeItem('picShineAiHistory'); // Clear corrupted history
+      }
     }
   }, []);
 
   const updateLocalStorageHistory = (newHistory: HistoryItem[]) => {
-    localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
+    try {
+      localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
+    } catch (error) {
+        console.error("Error saving history to localStorage (likely quota exceeded):", error);
+        toast({
+            title: "History Save Error",
+            description: "Could not save the full history. Older items might be removed.",
+            variant: "destructive",
+        });
+        // If quota is exceeded, try saving a smaller history (e.g., just the latest item)
+        // This is a fallback, the main fix is reducing data per item.
+        if (newHistory.length > 0) {
+            try {
+                localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory.slice(0,1)));
+            } catch (e) {
+                console.error("Still failed to save even a single history item:", e);
+            }
+        }
+    }
   };
 
   const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
+    if (!original) return; // Do not add to history if original image is not set
+
     const newItem: HistoryItem = {
       id: Date.now().toString(),
-      originalImage: original,
+      // originalImage field removed from here
       enhancedImage: enhanced,
       operation,
       timestamp: Date.now(),
@@ -90,12 +122,18 @@ export default function PicShineAiPage() {
     const today = new Date().toISOString().split('T')[0];
     localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: newCount }));
 
-    if (DAILY_LIMIT - newCount === WARNING_THRESHOLD) {
+    if (DAILY_LIMIT - newCount <= WARNING_THRESHOLD && DAILY_LIMIT - newCount > 0) {
       toast({
         title: "Usage Warning",
-        description: `You have ${WARNING_THRESHOLD} enhancements left for today.`,
+        description: `You have ${DAILY_LIMIT - newCount} enhancements left for today.`,
         variant: "default", 
       });
+    } else if (DAILY_LIMIT - newCount === 0) {
+        toast({
+            title: "Usage Limit Reached",
+            description: `You have used all your enhancements for today.`,
+            variant: "destructive",
+        });
     }
     return true;
   };
@@ -181,12 +219,15 @@ export default function PicShineAiPage() {
     } catch (error) {
       console.error(`Error ${operationName.toLowerCase()} image:`, error);
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
-      if (error instanceof Error && error.message.includes("blocked")) {
+      if (error instanceof Error && error.message.includes("AI model did not return an image")) {
+        errorMessage = error.message; // Use the more specific error from the flow
+      } else if (error instanceof Error && error.message.includes("blocked")) {
         errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
       } else if (error instanceof Error) {
-        errorMessage = error.message;
+        errorMessage = `Error: ${error.message}`;
       }
       toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive" });
+       setEnhancedImage(null); // Clear enhanced image on failure
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -221,7 +262,13 @@ export default function PicShineAiPage() {
     }
     const link = document.createElement('a');
     link.href = enhancedImage;
-    link.download = `picshine-ai-${fileName ? fileName.split('.')[0] : 'enhanced'}.png`;
+
+    let downloadFileName = 'picshine-ai-enhanced.png';
+    if (fileName) {
+        const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        downloadFileName = `picshine-ai-${nameWithoutExtension}-enhanced.png`;
+    }
+    link.download = downloadFileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -236,10 +283,16 @@ export default function PicShineAiPage() {
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    setOriginalImage(item.originalImage);
+    // When loading from history, the enhanced image becomes the new "original" 
+    // for further operations, and also populates the "enhanced" view.
+    setOriginalImage(item.enhancedImage); 
     setEnhancedImage(item.enhancedImage);
     setFileName(item.fileName || `history_image_${item.id}.png`);
-     window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast({
+        title: "Loaded from History",
+        description: `${item.operation} on ${item.fileName || 'image'} loaded. You can apply further enhancements.`
+    })
   };
 
   const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint }: { src: string | null, alt: string, placeholderText: string, 'data-ai-hint'?: string }) => (
@@ -409,7 +462,7 @@ export default function PicShineAiPage() {
       </Card>
       <footer className="text-center py-8 text-muted-foreground text-sm">
         <p>&copy; {new Date().getFullYear()} PicShine AI. All rights reserved.</p>
-        <p>Powered by Genkit & Google AI. For inquiries, contact: support@picshine-ai.app</p>
+        <p>Powered by Genkit & Google AI. For inquiries, contact: support@picshine.ai</p>
       </footer>
 
       <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>
@@ -434,3 +487,5 @@ export default function PicShineAiPage() {
     </main>
   );
 }
+
+
