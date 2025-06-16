@@ -78,11 +78,11 @@ export default function PicShineAiPage() {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
       // This block executes if the above setItem fails (e.g., quota exceeded)
-      console.error("Error saving full history to localStorage (quota likely exceeded):", error);
+      // console.error("Error saving full history to localStorage (quota likely exceeded):", error); // Removed this console.error
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default", 
+        variant: "default",
       });
 
       // Fallback: Try to save only the most recent item from the newHistory array
@@ -140,7 +140,7 @@ export default function PicShineAiPage() {
       toast({
         title: "Usage Warning",
         description: `You have ${DAILY_LIMIT - newCount} enhancements left for today.`,
-        variant: "default", 
+        variant: "default",
       });
     } else if (DAILY_LIMIT - newCount === 0) {
         toast({
@@ -161,7 +161,7 @@ export default function PicShineAiPage() {
           variant: "destructive",
         });
         if (fileInputRef.current) {
-            fileInputRef.current.value = ""; 
+            fileInputRef.current.value = "";
         }
         return;
       }
@@ -170,7 +170,7 @@ export default function PicShineAiPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         setOriginalImage(reader.result as string);
-        setEnhancedImage(null); 
+        setEnhancedImage(null);
       };
       reader.onerror = () => {
         toast({
@@ -265,7 +265,7 @@ export default function PicShineAiPage() {
     setEnhancedImage(null);
     setFileName(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; 
+      fileInputRef.current.value = "";
     }
   };
 
@@ -297,9 +297,9 @@ export default function PicShineAiPage() {
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    // When loading from history, the enhanced image becomes the new "original" 
+    // When loading from history, the enhanced image becomes the new "original"
     // for further operations, and also populates the "enhanced" view.
-    setOriginalImage(item.enhancedImage); 
+    setOriginalImage(item.enhancedImage);
     setEnhancedImage(item.enhancedImage);
     setFileName(item.fileName || `history_image_${item.id}.png`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -328,7 +328,7 @@ export default function PicShineAiPage() {
       <Card className="w-full max-w-5xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
         <CardHeader className="text-center bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-6 sm:p-8">
           <div className="flex items-center justify-center mb-2">
-            <Sparkles size={36} className="mr-3" /> 
+            <Sparkles size={36} className="mr-3" />
             <CardTitle className="text-2xl sm:text-3xl font-headline">PicShine AI</CardTitle>
           </div>
           <CardDescription className="text-primary-foreground/90 text-sm sm:text-base">
@@ -336,7 +336,7 @@ export default function PicShineAiPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 md:p-10 space-y-8">
-          
+
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div className="md:col-span-3 space-y-4">
               <label
@@ -366,7 +366,7 @@ export default function PicShineAiPage() {
                   <p className="text-sm text-center text-muted-foreground">{loadingMessage}</p>
                 </div>
               )}
-            
+
               <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-4">
                 <Button
                   onClick={handleSmartEnhance}
@@ -455,8 +455,8 @@ export default function PicShineAiPage() {
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                 {userHistory.map((item) => (
-                  <Card 
-                    key={item.id} 
+                  <Card
+                    key={item.id}
                     className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 group bg-card"
                     onClick={() => loadFromHistory(item)}
                     title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
