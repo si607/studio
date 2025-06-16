@@ -350,7 +350,7 @@ export default function PicShineAiPage() {
 
             </div>
             <div className="md:col-span-2 space-y-2">
-                <div className="bg-gray-100 p-3 rounded-lg text-center text-sm text-gray-600 shadow">
+                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
                     <p className="font-semibold">Ad Placeholder 1</p>
                     <p className="text-xs">Your advertisement could be here!</p>
                 </div>
@@ -361,7 +361,7 @@ export default function PicShineAiPage() {
                 >
                   <Star className="mr-2 h-5 w-5" /> Upgrade to Pro (Coming Soon)
                 </Button>
-                 <div className="bg-gray-100 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 shadow">
+                 <div className="bg-gray-100 dark:bg-gray-800 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
                     <p className="font-semibold">Ad Placeholder 2</p>
                     <p className="text-xs">Promote your product or service.</p>
                 </div>
@@ -388,7 +388,7 @@ export default function PicShineAiPage() {
                 {userHistory.map((item) => (
                   <Card 
                     key={item.id} 
-                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 group"
+                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 group bg-card"
                     onClick={() => loadFromHistory(item)}
                     title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
                   >

@@ -27,8 +27,8 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))', // Soft Lavender
-          foreground: 'hsl(var(--primary-foreground))', // Dark Purple text on Soft Lavender
+          DEFAULT: 'hsl(var(--primary))', 
+          foreground: 'hsl(var(--primary-foreground))', 
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -39,8 +39,8 @@ export default {
           foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: 'hsl(var(--accent))', // Pale Violet
-          foreground: 'hsl(var(--accent-foreground))', // Dark Purple text on Pale Violet
+          DEFAULT: 'hsl(var(--accent))', 
+          foreground: 'hsl(var(--accent-foreground))', 
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
