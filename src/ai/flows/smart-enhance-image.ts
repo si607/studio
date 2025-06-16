@@ -45,15 +45,15 @@ const smartEnhanceImageFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-exp',
       prompt: [
         {media: {url: input.photoDataUri}},
-        {text: 'Analyze the provided image. Upscale its resolution significantly (e.g., 2x or 4x if possible) while maintaining or improving clarity. Reduce any visible noise or artifacts. If human faces are present, subtly enhance their clarity and features, such as eyes and skin texture, without altering the person\'s identity or making them look artificial. The goal is a natural-looking, high-quality enhancement. Preserve the original artistic style and composition.'},
+        {text: "Dramatically enhance the provided image. Perform a significant upscaling, aiming for at least a 4x resolution increase, ensuring maximum detail and sharpness. Aggressively reduce noise and artifacts. For human faces, bring out fine details, improve skin texture, and enhance eye clarity for a striking, yet natural result. The output should be a remarkably improved, high-definition version of the original, while respecting its core composition."},
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
          safetySettings: [ 
           { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
         ],
       },
     });

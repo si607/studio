@@ -22,7 +22,7 @@ const ColorizeImageInputSchema = z.object({
 export type ColorizeImageInput = z.infer<typeof ColorizeImageInputSchema>;
 
 const ColorizeImageOutputSchema = z.object({
-  enhancedPhotoDataUri: z // Keep consistent naming with other enhancement outputs
+  enhancedPhotoDataUri: z 
     .string()
     .describe(
       'The colorized photo, as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:<mimetype>;base64,<encoded_data>.'
@@ -45,15 +45,15 @@ const colorizeImageFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-exp',
       prompt: [
         {media: {url: input.photoDataUri}},
-        {text: 'Analyze the provided image. If it is black and white or grayscale, colorize it with realistic, vibrant, and historically/contextually appropriate colors. Aim for a natural look. If the image is already in color, either return it as is or make subtle, tasteful color enhancements to improve vibrancy and balance, without drastically altering the original color scheme.'},
+        {text: "Transform the provided image with rich, vivid, and lifelike colors. If it's black and white or grayscale, apply a full, high-fidelity colorization that is both historically accurate (if applicable) and aesthetically stunning. Aim for deep, natural tones and excellent contrast. If already in color, significantly boost its vibrancy, correct any color casts, and enhance overall color harmony for a professional, eye-catching result."},
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
          safetySettings: [
           { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
         ],
       },
     });

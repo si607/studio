@@ -44,15 +44,15 @@ const removeScratchesFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-exp',
       prompt: [
         {media: {url: input.photoDataUri}},
-        {text: 'Analyze the provided image. Identify and carefully remove scratches, creases, small tears, and other minor physical damages. The goal is to restore the image to a cleaner state while preserving original details, textures, and the overall character of the photo. Avoid over-smoothing or creating an artificial look.'},
+        {text: "Thoroughly restore the provided image by meticulously identifying and eliminating all noticeable scratches, creases, tears, spots, and other physical damages. The restoration should be comprehensive, resulting in a pristine image. Prioritize preserving original details and textures, but ensure significant removal of imperfections for a dramatically cleaner appearance. Avoid an overly smooth or artificial digital look."},
       ],
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
          safetySettings: [
           { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
           { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
         ],
       },
     });
