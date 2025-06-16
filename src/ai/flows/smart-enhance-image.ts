@@ -58,8 +58,9 @@ const smartEnhanceImageFlow = ai.defineFlow(
       },
     });
     if (!media?.url) {
-      throw new Error('AI model did not return an image. The content might have been blocked or the model failed to produce an image.');
+      throw new Error('AI model did not return an image. This could be due to content safety filters blocking the request, an issue with the input image, or a temporary model problem. Please try a different image or try again later.');
     }
     return {enhancedPhotoDataUri: media.url};
   }
 );
+
