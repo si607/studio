@@ -63,4 +63,3 @@ const smartEnhanceImageFlow = ai.defineFlow(
     return {enhancedPhotoDataUri: media.url};
   }
 );
-

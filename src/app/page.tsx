@@ -105,21 +105,32 @@ export default function PicShineAiPage() {
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
     try {
+      // Attempt to save the potentially full new history (up to HISTORY_LIMIT items)
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
+      // This block executes if the above setItem fails (e.g., quota exceeded)
+      // No console.error here, rely on toast for user feedback if fallback also fails.
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default",
+        variant: "default", // Changed from "destructive" to "default" for less alarm
       });
       try {
         if (newHistory.length > 0) {
+          // Fallback: Try to save only the MOST RECENT history item
           localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
+           toast({ // Optional: Inform user that only latest was saved if preferred
+             title: "Partial History Saved",
+             description: "Only your most recent enhancement could be saved due to storage limits.",
+             variant: "default",
+           });
         } else {
+          // If newHistory is empty (e.g., user cleared history), still try to update localStorage
           localStorage.setItem('picShineAiHistory', JSON.stringify([]));
         }
       } catch (fallbackError) {
-        console.error("Error saving even the latest history item to localStorage:", fallbackError);
+        // This block executes if even saving the single latest item fails
+        console.error("Critical: Error saving even the latest history item to localStorage:", fallbackError);
         toast({
           title: "History Save Failed",
           description: "Unable to save any enhancement history due to critical browser storage limits. Your session history won't be preserved.",
@@ -142,6 +153,7 @@ export default function PicShineAiPage() {
           setUsageCount(0);
         }
       } catch (e) {
+        // If parsing fails, reset usage
         localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
@@ -153,25 +165,38 @@ export default function PicShineAiPage() {
     if (storedHistory) {
       try {
         const parsedHistory = JSON.parse(storedHistory);
-        if (Array.isArray(parsedHistory)) {
-          setUserHistory(parsedHistory.filter(item => typeof item === 'object' && item !== null && item.id && item.enhancedImage && item.operation));
+         if (Array.isArray(parsedHistory)) {
+          // Ensure all items in parsedHistory are valid HistoryItem objects
+          const validHistory = parsedHistory.filter(item => 
+            typeof item === 'object' && item !== null &&
+            item.id && typeof item.id === 'string' &&
+            item.enhancedImage && typeof item.enhancedImage === 'string' &&
+            item.operation && typeof item.operation === 'string' &&
+            item.timestamp && typeof item.timestamp === 'number'
+            // item.fileName can be undefined or string
+          );
+          setUserHistory(validHistory);
         } else {
           console.warn("Stored history is not an array or is null, clearing.");
           setUserHistory([]);
-          localStorage.removeItem('picShineAiHistory');
+          localStorage.removeItem('picShineAiHistory'); // Clear corrupted item
         }
       } catch (error) {
         console.error("Error parsing history from localStorage, clearing:", error);
         setUserHistory([]);
-        localStorage.removeItem('picShineAiHistory');
+        localStorage.removeItem('picShineAiHistory'); // Clear corrupted item
       }
     }
+    // Ensure hasMounted is set to true *after* initial loading effects are done.
+    // requestAnimationFrame defers this slightly to avoid issues with immediate re-renders.
     requestAnimationFrame(() => {
         hasMounted.current = true;
     });
   }, []);
 
   useEffect(() => {
+    // Only run this effect if the component has mounted and userHistory has actually changed
+    // This prevents saving the initially loaded history back to localStorage redundantly.
     if (!hasMounted.current) {
       return;
     }
@@ -187,6 +212,7 @@ export default function PicShineAiPage() {
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
     };
+    // This state update will trigger the useEffect above to save to localStorage
     setUserHistory(prevHistory => [newItem, ...prevHistory].slice(0, HISTORY_LIMIT));
   };
 
@@ -405,6 +431,7 @@ export default function PicShineAiPage() {
         </section>
 
         <div id="container-242b734757198216a6ef5b94eae86475" className="ad-placeholder-container my-8">
+           {/* This div is targeted by the ad script */}
         </div>
 
         <section className="glass-card p-6 md:p-8 rounded-2xl mb-12">
@@ -495,7 +522,7 @@ export default function PicShineAiPage() {
             <div className="lg:col-span-2 space-y-4">
                <div className="ad-placeholder-container">
                   <div className="ad-label">Advertisement Area 1</div>
-                   <p className="text-sm text-[rgb(var(--muted-foreground))]">Reference Ad ID: ca-app-pub-2900494836662252/1153507362</p>
+                   <p className="text-sm text-[rgb(var(--muted-foreground))]">AdMob Unit ID: ca-app-pub-2900494836662252/1153507362 (Visual Reference)</p>
                    <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">(e.g., AdSense or other display ad)</p>
               </div>
                 <Button
@@ -508,7 +535,7 @@ export default function PicShineAiPage() {
                 </Button>
                  <div className="ad-placeholder-container">
                     <div className="ad-label">Advertisement Area 2</div>
-                    <p className="text-sm text-[rgb(var(--muted-foreground))]">Visual ad placeholder.</p>
+                    <p className="text-sm text-[rgb(var(--muted-foreground))]">General Ad Placeholder</p>
                 </div>
             </div>
           </div>
