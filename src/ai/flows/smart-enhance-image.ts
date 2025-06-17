@@ -63,7 +63,10 @@ const smartEnhanceImageFlow = ai.defineFlow(
       }
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
-        console.error('[smartEnhanceImageFlow] Detailed error during AI generation. Check original error message and Next.js digest (if applicable) in server logs. Original Error:', e);
+        console.error(
+          `[smartEnhanceImageFlow] Error during AI generation. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for detailed Firebase/Google AI error messages, API key issues, billing status, or a Next.js error digest. Original error object:`,
+          e
+        );
         let clientErrorMessage = 'Photo enhancement failed due to an unexpected server error. Please check server logs for details like an error digest.';
         if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('html')) {
             if (e.message.includes('API key not valid') || e.message.includes('permission denied') || e.message.includes('Authentication failed')) {

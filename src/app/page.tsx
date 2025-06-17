@@ -104,6 +104,7 @@ export default function PicShineAiPage() {
   const hasMounted = useRef(false);
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
+    if (!hasMounted.current) return; // Don't save during initial load
     try {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
@@ -179,14 +180,20 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    hasMounted.current = true;
+    // Mark as mounted AFTER initial data load attempts
+    // Use a timeout to ensure this runs after the very first render cycle completes
+    const timer = setTimeout(() => {
+      hasMounted.current = true;
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (!hasMounted.current) {
-      return;
+    // This effect now handles persisting history changes to localStorage
+    // It runs only after the component has mounted and userHistory changes.
+    if (hasMounted.current) {
+      updateLocalStorageHistory(userHistory);
     }
-    updateLocalStorageHistory(userHistory);
   }, [userHistory, updateLocalStorageHistory]);
 
 
@@ -198,6 +205,7 @@ export default function PicShineAiPage() {
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
     };
+    // This now only updates the state. The useEffect above will handle localStorage.
     setUserHistory(prevHistory => [newItem, ...prevHistory].slice(0, HISTORY_LIMIT));
   };
 
@@ -320,7 +328,7 @@ export default function PicShineAiPage() {
         } else if (error.message.includes("blocked")) {
           errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (error.message.toLowerCase().includes("an error occurred in the server components render")) {
-          errorMessage = `A server-side error occurred. Please check the server logs (e.g., Firebase Function logs) for a detailed error message or digest. The original client message was: ${error.message}`;
+          errorMessage = `Important: A critical server-side error occurred with the AI enhancement. You MUST check your Firebase Function server logs. Look for detailed error messages from Google AI or a Next.js 'digest' value. This is often due to API key, billing, or permissions issues in your production environment. Client saw: ${error.message}`;
         } else {
           errorMessage = `Error: ${error.message}`;
         }
@@ -627,5 +635,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
-    
