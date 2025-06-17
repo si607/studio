@@ -62,3 +62,4 @@ const removeScratchesFlow = ai.defineFlow(
     return {enhancedPhotoDataUri: media.url};
   }
 );
+
