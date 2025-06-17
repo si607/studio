@@ -91,8 +91,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
             } else if (lowerMsg.includes('ai model did not return an image')) {
                  clientErrorMessage = e.message; 
             } else {
-                // Try to pass a more specific message if it's not one of the generic ones
-                const displayMessage = originalMsg.length < 150 ? originalMsg : 'Details in server logs.';
+                const displayMessage = originalMsg.length < 200 ? originalMsg : 'See server logs for full details.';
                 clientErrorMessage = `Enhancement error: ${displayMessage} (Check Firebase Function logs for full details)`;
             }
         }
@@ -100,9 +99,4 @@ const smartEnhanceImageFlow = ai.defineFlow(
       }
   }
 );
-
-    
-
-    
-
     

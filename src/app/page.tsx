@@ -319,7 +319,7 @@ export default function PicShineAiPage() {
         icon: <CheckCircle2 className="h-5 w-5 text-green-400" />,
       });
     } catch (error: any) {
-      console.error(`[${operationName}] Client-side error wrapper:`, error);
+      console.error(`[${operationName}] Client-side error wrapper. Original error object:`, error);
       setEnhancedImage(null); 
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       let errorTitle = `${operationName} Failed`;
@@ -328,34 +328,38 @@ export default function PicShineAiPage() {
         const lowerCaseErrorMessage = error.message.toLowerCase();
         const originalMsg = error.message;
 
-        // Check for specific Next.js server component rendering error or similar generic messages
         if (
           lowerCaseErrorMessage.includes('an error occurred in the server components render') ||
-          (originalMsg.includes("Google AI") && originalMsg.includes("failed")) || // Specifically for "Google AI ... failed"
+          (originalMsg.includes("Google AI") && originalMsg.includes("failed")) ||
           lowerCaseErrorMessage.includes('internal server error') ||
-          lowerCaseErrorMessage.includes('failed to fetch') || // Generic network/server issues
+          lowerCaseErrorMessage.includes('failed to fetch') ||
           (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300) || // HTML error snippet
-          originalMsg.toLowerCase().startsWith('critical: ai enhancement failed') // Catch our own critical server errors passed through
+          originalMsg.toLowerCase().startsWith('critical: ai enhancement failed')
         ) {
           errorTitle = "Server-Side AI Error";
           errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes('ai model did not return an image')) {
-          errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters, an issue with the input image, or a temporary model problem. Try a different image or adjust your request.`;
+          errorTitle = "AI Model Error";
+          errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters, an issue with the input image, or a temporary model problem. Try a different image or adjust your request. (Details in server logs if issue persists).`;
         } else if (lowerCaseErrorMessage.includes('blocked by safety setting') || lowerCaseErrorMessage.includes('safety policy violation')) {
+          errorTitle = "Content Safety Block";
           errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (lowerCaseErrorMessage.includes('api key not valid') || lowerCaseErrorMessage.includes('permission denied') || lowerCaseErrorMessage.includes('authentication failed')) {
+          errorTitle = "Server Configuration Error";
           errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup and Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes('quota') || lowerCaseErrorMessage.includes('limit')) {
+          errorTitle = "Service Limit Reached";
           errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes('billing account not found') || lowerCaseErrorMessage.includes('billing')) {
+          errorTitle = "Billing Issue";
           errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
         } else {
           // Fallback for other errors, try to show the original message if concise.
-          const detail = originalMsg.length > 150 ? "See server logs for details." : originalMsg;
+          const detail = originalMsg.length > 200 ? "An unexpected error occurred. See server logs for more details." : originalMsg;
           errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
       }
-      toast({ title: errorTitle, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 10000 });
+      toast({ title: errorTitle, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 12000 });
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -408,7 +412,7 @@ export default function PicShineAiPage() {
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    setOriginalImage(item.enhancedImage); // Set original to the history item to allow further enhancements
+    setOriginalImage(item.enhancedImage); 
     setEnhancedImage(item.enhancedImage);
     setFileName(item.fileName || `history_image_${item.id}.png`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -655,12 +659,4 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-    
-
-    
-
-    
-
-    
-
     
