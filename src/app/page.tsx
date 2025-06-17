@@ -134,10 +134,15 @@ export default function PicShineAiPage() {
     const today = new Date().toISOString().split('T')[0];
     const storedUsage = localStorage.getItem('picShineAiUsage');
     if (storedUsage) {
-      const { date, count } = JSON.parse(storedUsage);
-      if (date === today) {
-        setUsageCount(count);
-      } else {
+      try {
+        const { date, count } = JSON.parse(storedUsage);
+        if (date === today && typeof count === 'number') {
+          setUsageCount(count);
+        } else {
+          localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
+          setUsageCount(0);
+        }
+      } catch (e) {
         localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
@@ -150,17 +155,26 @@ export default function PicShineAiPage() {
       try {
         const parsedHistory = JSON.parse(storedHistory);
         if (Array.isArray(parsedHistory)) {
-            setUserHistory(parsedHistory);
+          // Further validation for history items can be added here if needed
+          setUserHistory(parsedHistory.filter(item => typeof item === 'object' && item !== null && item.id && item.enhancedImage && item.operation));
         } else {
-            setUserHistory([]);
-            localStorage.removeItem('picShineAiHistory'); 
+          // If parsedHistory is not an array (e.g. null or other types from corrupted data)
+          console.warn("Stored history is not an array, clearing.");
+          setUserHistory([]);
+          localStorage.removeItem('picShineAiHistory');
         }
       } catch (error) {
+        console.error("Error parsing history from localStorage, clearing:", error);
         setUserHistory([]);
         localStorage.removeItem('picShineAiHistory');
       }
     }
-    hasMounted.current = true;
+    // Set hasMounted to true after initial load effects are done
+    // This ensures subsequent userHistory changes trigger updateLocalStorageHistory
+    // but not the initial load from localStorage itself.
+    requestAnimationFrame(() => {
+        hasMounted.current = true;
+    });
   }, []);
 
   useEffect(() => {
@@ -602,3 +616,5 @@ export default function PicShineAiPage() {
   );
 }
 
+
+    
