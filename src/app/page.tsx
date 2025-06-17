@@ -181,8 +181,6 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    // Set hasMounted to true after initial hydration and localStorage access
-    // This ensures localStorage writes only happen client-side after initial setup
     hasMounted.current = true; 
   }, []);
 
@@ -322,7 +320,6 @@ export default function PicShineAiPage() {
       
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
-        // Check for the generic Next.js server components render error
         if (lowerCaseErrorMessage.includes("an error occurred in the server components render")) {
           errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes("ai model did not return an image")) {
@@ -333,7 +330,7 @@ export default function PicShineAiPage() {
           errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup and Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("quota") || lowerCaseErrorMessage.includes("limit")) {
           errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
-        } else if (lowerCaseErrorMessage.includes("billing account not found")) {
+        } else if (lowerCaseErrorMessage.includes("billing account not found") || lowerCaseErrorMessage.includes("billing")) {
           errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("html")) { 
             errorMessage = `Unexpected Error: The server returned an HTML error page instead of AI data. PLEASE CHECK FIREBASE FUNCTION LOGS. This can be due to severe misconfiguration or outages.`;
@@ -642,5 +639,7 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
+    
 
     
