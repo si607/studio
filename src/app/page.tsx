@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent } from 'react';
-import { Button } from '@/components/ui/button'; // Will be styled with gradient or glass
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Will be styled as glass-card
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -140,11 +140,10 @@ export default function PicShineAiPage() {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
       // This block executes if the above setItem fails (e.g., quota exceeded)
-      // console.error("Error saving full history to localStorage (quota likely exceeded):", error); // Removed to reduce console noise if fallback succeeds
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default", // Using 'default' as it's a warning, not destructive yet
+        variant: "default",
       });
       try {
         // Fallback: Attempt to save only the most recent item
@@ -166,10 +165,10 @@ export default function PicShineAiPage() {
   };
 
   const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
-    if (!originalImage) return; // originalImage is still needed to decide if history should be added
+    if (!originalImage) return;
     const newItem: HistoryItem = {
       id: Date.now().toString(),
-      enhancedImage: enhanced, // Only store enhanced image
+      enhancedImage: enhanced,
       operation,
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
@@ -354,8 +353,8 @@ export default function PicShineAiPage() {
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    setOriginalImage(item.enhancedImage); // Load enhanced image as original for further ops
-    setEnhancedImage(item.enhancedImage); // Also set it as enhanced to show it
+    setOriginalImage(item.enhancedImage); 
+    setEnhancedImage(item.enhancedImage); 
     setFileName(item.fileName || `history_image_${item.id}.png`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     toast({
@@ -396,10 +395,9 @@ export default function PicShineAiPage() {
           </p>
         </section>
 
-        {/* Ad placeholder - styled to match user request */}
-        <div className="ad-placeholder-container my-8">
-            <div className="ad-label">Advertisement</div>
-            <p className="text-sm text-[rgb(var(--muted-foreground))]">Your Ad Unit: ca-app-pub-2900494836662252/1153507362</p>
+        {/* Ad placeholder - targeted by ad script */}
+        <div id="container-242b734757198216a6ef5b94eae86475" className="ad-placeholder-container my-8">
+            {/* This container is targeted by the ad script. Content will be injected by the script. */}
         </div>
 
         {/* Main Enhancement Tool */}
