@@ -9,84 +9,86 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 96.1%; /* Light Gray #F5F5F5 */
-    --foreground: 240 10% 3.9%; 
+    /* Dark Theme Inspired by User HTML */
+    --background-start-rgb: 14, 14, 18; /* #0E0E12 */
+    --background-end-rgb: 26, 26, 38;   /* #1A1A26 */
+    --background: linear-gradient(135deg, rgb(var(--background-start-rgb)) 0%, rgb(var(--background-end-rgb)) 100%);
+    --foreground: 229, 231, 235; /* #E5E7EB */
 
-    --card: 0 0% 100%; 
-    --card-foreground: 240 10% 3.9%;
+    --card-bg-rgb: 26, 26, 38; /* #1A1A26 */
+    --card-bg-alpha: 0.7;
+    --card-border-rgb: 255, 255, 255;
+    --card-border-alpha: 0.1;
+    --card: rgba(var(--card-bg-rgb), var(--card-bg-alpha));
+    --card-foreground: var(--foreground);
 
-    --popover: 0 0% 100%; 
-    --popover-foreground: 240 10% 3.9%; 
+    --popover: rgba(var(--card-bg-rgb), 0.95);
+    --popover-foreground: var(--foreground);
 
-    --primary: 240 67% 96.9%; /* Soft Lavender #E6E6FA */
-    --primary-foreground: 240 50% 30%; /* Dark Purple for text on Soft Lavender */
+    /* Primary Gradient - for buttons and accents */
+    --primary-start-rgb: 77, 61, 244;  /* #4D3DF4 */
+    --primary-mid-rgb: 171, 63, 251; /* #AB3FFB */
+    --primary-end-rgb: 30, 144, 255; /* #1E90FF */
+    --primary: linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)));
+    --primary-text: 255, 255, 255; /* White text on gradient */
+    --primary-foreground: rgb(var(--primary-text));
 
-    --secondary: 240 4.8% 95.9%; 
-    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 4.8% 95.9%; 
-    --muted-foreground: 240 3.8% 46.1%; 
+    --secondary: 55, 65, 81; /* #374151 - A darker gray for secondary elements */
+    --secondary-foreground: var(--foreground);
 
-    --accent: 276 27.3% 85.9%; /* Pale Violet #D8BFD8 */
-    --accent-foreground: 276 30% 25%; /* Dark Purple for text on Pale Violet */
+    --muted: 75, 85, 99; /* #4B5563 - Muted text or elements */
+    --muted-foreground: 156, 163, 175; /* #9CA3AF */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --accent: rgb(var(--primary-mid-rgb)); /* Using mid color of primary gradient */
+    --accent-foreground: var(--foreground);
 
-    --border: 240 5.9% 90%; 
-    --input: 240 5.9% 90%; 
-    --ring: 240 50% 50%; /* Ring color for focus states - can be a brighter purple */
+    --destructive: 239, 68, 68; /* #EF4444 - Red for errors */
+    --destructive-foreground: var(--primary-text);
 
+    --border: rgba(var(--card-border-rgb), var(--card-border-alpha));
+    --input: rgba(var(--card-bg-rgb), 0.5); /* Semi-transparent input background */
+    --input-border: rgba(var(--card-border-rgb), 0.2);
+    --ring: rgb(var(--primary-start-rgb));
+
+    --radius: 0.75rem; /* From previous theme, can be adjusted */
+
+    /* Specific component colors based on new theme */
+    --toast-bg: rgba(var(--card-bg-rgb), 0.9);
+    --toast-border: rgb(var(--primary-start-rgb));
+
+     /* Chart colors (can be updated if charts are used) */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.75rem; /* Increased radius for a more modern feel */
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 240 50% 70%; 
-    --primary-foreground: 240 67% 96.9%; 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 276 30% 50%; 
-    --accent-foreground: 276 27.3% 90%; 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 50% 60%; 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  /* Fallback for non-gradient backgrounds if needed */
+  .bg-primary-fallback {
+    background-color: rgb(var(--primary-start-rgb));
+  }
+
+
+  /* Light mode (basic setup, can be expanded based on user's HTML light mode) */
+  .light {
+    --background-start-rgb: 248, 250, 252; /* #f8fafc */
+    --background-end-rgb: 226, 232, 240;   /* #e2e8f0 */
+    --foreground: 31, 41, 55; /* #1f2937 */
+
+    --card-bg-rgb: 255, 255, 255;
+    --card-bg-alpha: 0.8;
+    --card-border-rgb: 0,0,0;
+    --card-border-alpha: 0.1;
+    
+    --popover: rgba(var(--card-bg-rgb), 0.95);
+    --secondary: 243, 244, 246; /* #F3F4F6 */
+    --muted: 229, 231, 235; /* #E5E7EB */
+    --muted-foreground: 107, 114, 128; /* #6B7283 */
+    --input: rgb(var(--card-bg-rgb));
+    --input-border: rgba(var(--card-border-rgb), 0.2);
+    --toast-bg: rgba(var(--card-bg-rgb), 0.9);
   }
 }
 
@@ -95,6 +97,55 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    background: var(--background);
+    color: rgb(var(--foreground));
+    min-height: 100vh;
   }
+}
+
+/* Custom Styles for Glass Card and Gradient Button */
+.glass-card {
+  background: var(--card);
+  @apply backdrop-blur-xl border rounded-2xl shadow-2xl;
+}
+
+.gradient-button {
+  background: var(--primary);
+  color: rgb(var(--primary-text));
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+  @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
+}
+
+.gradient-button:hover {
+  transform: translateY(-1px);
+  @apply shadow-lg;
+  filter: brightness(1.1);
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Style for ad placeholders to make them visually distinct */
+.ad-placeholder-container {
+  background: rgba(var(--card-bg-rgb), var(--card-bg-alpha));
+  border: 1px solid var(--border);
+  @apply rounded-lg p-4 my-4 text-center backdrop-blur-md;
+}
+
+.ad-label {
+  @apply text-xs uppercase tracking-wider mb-2;
+  color: rgb(var(--muted-foreground));
+}
+
+/* Additional style for fixed header to avoid content overlap */
+body {
+  padding-top: 80px; /* Adjust based on header height */
+}
+
+header.fixed-header {
+  background: rgba(var(--card-bg-rgb), 0.85); /* Slightly more opaque for readability */
+  @apply backdrop-blur-2xl;
 }

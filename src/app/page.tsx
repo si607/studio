@@ -2,28 +2,91 @@
 "use client";
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button'; // Will be styled with gradient or glass
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Will be styled as glass-card
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon, Camera, Zap, CheckCircle2, Info, AlertCircle, Layers, Settings2, ShieldCheck, Crown } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
 
 const DAILY_LIMIT = 30;
 const HISTORY_LIMIT = 5;
-const WARNING_THRESHOLD = 5; // Show warning when 5 enhancements are left
+const WARNING_THRESHOLD = 5;
 
 interface HistoryItem {
   id: string;
-  // originalImage: string; // Removed to save localStorage space
   enhancedImage: string;
   operation: string;
   timestamp: number;
   fileName?: string;
 }
+
+const AppHeader = () => (
+  <header className="fixed-header fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl mt-4 rounded-2xl shadow-lg">
+    <div className="container mx-auto px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-primary-fallback rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4D3DF4 0%, #AB3FFB 50%, #1E90FF 100%)'}}>
+            <Sparkles size={24} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-[rgb(var(--foreground))]">PicShine AI</h1>
+            <p className="text-xs text-[rgb(var(--muted-foreground))]">Photo Enhancement</p>
+          </div>
+        </div>
+        <Button className="gradient-button text-sm px-4 py-2">
+          <Crown size={16} className="mr-2" /> Premium
+        </Button>
+      </div>
+    </div>
+  </header>
+);
+
+const AppFooter = () => (
+ <footer className="glass-card mx-auto max-w-7xl mb-4 rounded-2xl">
+    <div className="container mx-auto px-6 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-8 h-8 bg-primary-fallback rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4D3DF4 0%, #AB3FFB 50%, #1E90FF 100%)'}}>
+              <Sparkles size={18} className="text-white" />
+            </div>
+            <span className="text-lg font-bold text-[rgb(var(--foreground))]">PicShine AI</span>
+          </div>
+          <p className="text-[rgb(var(--muted-foreground))] text-sm">Transform your photos with cutting-edge AI technology.</p>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Product</h4>
+          <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
+            <li><a href="#features" className="hover:text-[rgb(var(--foreground))] transition-colors">Features</a></li>
+            <li><a href="#pricing" className="hover:text-[rgb(var(--foreground))] transition-colors">Pricing</a></li>
+            <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">API</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Support</h4>
+          <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
+            <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">Help Center</a></li>
+            <li><a href="mailto:support@picshine.ai" className="hover:text-[rgb(var(--foreground))] transition-colors">Contact</a></li>
+            <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">Status</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Connect</h4>
+           <p className="text-[rgb(var(--muted-foreground))] text-sm">Social links (TBD)</p>
+        </div>
+      </div>
+      <div className="border-t border-[rgba(var(--card-border-rgb),0.2)] mt-8 pt-6 text-center text-sm text-[rgb(var(--muted-foreground))]">
+        <p>&copy; {new Date().getFullYear()} PicShine AI. All rights reserved. Powered by Genkit & Google AI.</p>
+        <p>For inquiries, contact: support@picshine.ai</p>
+      </div>
+    </div>
+  </footer>
+);
+
 
 export default function PicShineAiPage() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -62,12 +125,11 @@ export default function PicShineAiPage() {
             setUserHistory(parsedHistory);
         } else {
             setUserHistory([]);
-            localStorage.removeItem('picShineAiHistory'); // Clear invalid history
+            localStorage.removeItem('picShineAiHistory');
         }
       } catch (error) {
-        console.error("Failed to parse history from localStorage", error);
         setUserHistory([]);
-        localStorage.removeItem('picShineAiHistory'); // Clear corrupted history
+        localStorage.removeItem('picShineAiHistory');
       }
     }
   }, []);
@@ -78,43 +140,36 @@ export default function PicShineAiPage() {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
       // This block executes if the above setItem fails (e.g., quota exceeded)
-      // console.error("Error saving full history to localStorage (quota likely exceeded):", error); // Removed this console.error
+      // console.error("Error saving full history to localStorage (quota likely exceeded):", error); // Removed to reduce console noise if fallback succeeds
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default",
+        variant: "default", // Using 'default' as it's a warning, not destructive yet
       });
-
-      // Fallback: Try to save only the most recent item from the newHistory array
       try {
+        // Fallback: Attempt to save only the most recent item
         if (newHistory.length > 0) {
-          // Ensure we are trying to save an array containing only the first (latest) item
           localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
         } else {
-          // If newHistory was somehow empty (defensive coding, should not happen with current addHistoryItem logic)
+          // If newHistory is empty (e.g., after reset), save an empty array
           localStorage.setItem('picShineAiHistory', JSON.stringify([]));
         }
       } catch (fallbackError) {
-        // This block executes if even saving a single item fails
         console.error("Error saving even the latest history item to localStorage:", fallbackError);
         toast({
           title: "History Save Failed",
-          description: "Unable to save any enhancement history due to critical browser storage limits. Your current session's history is in memory but won't persist across sessions.",
+          description: "Unable to save any enhancement history due to critical browser storage limits. Your session history won't be preserved.",
           variant: "destructive",
         });
-        // At this point, localStorage is likely full or unusable for this key.
-        // The userHistory state in React still holds the history for the current session.
       }
     }
   };
 
   const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
-    if (!originalImage) return; // Do not add to history if original image is not set (using originalImage state for check)
-
+    if (!originalImage) return; // originalImage is still needed to decide if history should be added
     const newItem: HistoryItem = {
       id: Date.now().toString(),
-      // originalImage field removed
-      enhancedImage: enhanced,
+      enhancedImage: enhanced, // Only store enhanced image
       operation,
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
@@ -141,12 +196,14 @@ export default function PicShineAiPage() {
         title: "Usage Warning",
         description: `You have ${DAILY_LIMIT - newCount} enhancements left for today.`,
         variant: "default",
+        icon: <AlertTriangle className="h-5 w-5 text-yellow-400" />,
       });
     } else if (DAILY_LIMIT - newCount === 0) {
         toast({
             title: "Usage Limit Reached",
             description: `You have used all your enhancements for today.`,
             variant: "destructive",
+            icon: <AlertCircle className="h-5 w-5" />,
         });
     }
     return true;
@@ -159,6 +216,7 @@ export default function PicShineAiPage() {
           title: "Invalid File Type",
           description: "Please upload a valid image file (e.g., PNG, JPG, GIF, WEBP).",
           variant: "destructive",
+          icon: <AlertCircle className="h-5 w-5" />,
         });
         if (fileInputRef.current) {
             fileInputRef.current.value = "";
@@ -177,6 +235,7 @@ export default function PicShineAiPage() {
           title: "File Read Error",
           description: "Could not read the selected file.",
           variant: "destructive",
+          icon: <AlertCircle className="h-5 w-5" />,
         });
       };
       reader.readAsDataURL(file);
@@ -215,7 +274,7 @@ export default function PicShineAiPage() {
     loadingText: string
   ) => {
     if (!originalImage) {
-      toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive" });
+      toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
     if (!checkAndIncrementUsage()) return;
@@ -229,19 +288,20 @@ export default function PicShineAiPage() {
       toast({
         title: `Image ${operationName}!`,
         description: `Your image has been successfully ${operationName.toLowerCase()}.`,
+        icon: <CheckCircle2 className="h-5 w-5 text-green-400" />,
       });
     } catch (error) {
       console.error(`Error ${operationName.toLowerCase()} image:`, error);
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       if (error instanceof Error && error.message.includes("AI model did not return an image")) {
-        errorMessage = error.message; // Use the more specific error from the flow
+        errorMessage = error.message;
       } else if (error instanceof Error && error.message.includes("blocked")) {
         errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
       } else if (error instanceof Error) {
         errorMessage = `Error: ${error.message}`;
       }
-      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive" });
-       setEnhancedImage(null); // Clear enhanced image on failure
+      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+       setEnhancedImage(null);
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -271,7 +331,7 @@ export default function PicShineAiPage() {
 
   const handleDownload = () => {
     if (!enhancedImage) {
-      toast({ title: "No Enhanced Image", description: "Enhance an image first to download.", variant: "destructive" });
+      toast({ title: "No Enhanced Image", description: "Enhance an image first to download.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
     const link = document.createElement('a');
@@ -286,35 +346,31 @@ export default function PicShineAiPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast({ title: "Download Started", description: "Your enhanced image is downloading." });
+    toast({ title: "Download Started", description: "Your enhanced image is downloading.", icon: <Download className="h-5 w-5" /> });
   };
 
   const handleUpgradePro = () => {
-    toast({
-      title: "Upgrade to Pro!",
-      description: "Premium features like unlimited usage, no watermarks, and high-quality export are coming soon!",
-    });
+    setShowLimitPopup(true); // Re-use existing limit popup for pro features
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    // When loading from history, the enhanced image becomes the new "original"
-    // for further operations, and also populates the "enhanced" view.
-    setOriginalImage(item.enhancedImage);
-    setEnhancedImage(item.enhancedImage);
+    setOriginalImage(item.enhancedImage); // Load enhanced image as original for further ops
+    setEnhancedImage(item.enhancedImage); // Also set it as enhanced to show it
     setFileName(item.fileName || `history_image_${item.id}.png`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     toast({
         title: "Loaded from History",
-        description: `${item.operation} on ${item.fileName || 'image'} loaded. You can apply further enhancements.`
+        description: `${item.operation} on ${item.fileName || 'image'} loaded. You can apply further enhancements.`,
+        icon: <HistoryIcon className="h-5 w-5" />
     })
   };
 
   const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint }: { src: string | null, alt: string, placeholderText: string, 'data-ai-hint'?: string }) => (
-    <div className="aspect-video bg-muted/50 rounded-lg flex items-center justify-center overflow-hidden border border-border shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="aspect-video bg-[rgba(var(--card-bg-rgb),0.3)] rounded-lg flex items-center justify-center overflow-hidden border border-[rgba(var(--card-border-rgb),0.15)] shadow-lg transition-all duration-300 hover:shadow-xl p-1">
       {src ? (
-        <img src={src} alt={alt} className="max-h-full max-w-full object-contain p-1" data-ai-hint={aiHint} />
+        <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" data-ai-hint={aiHint} />
       ) : (
-        <div className="flex flex-col items-center text-muted-foreground p-4 text-center">
+        <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
           <ImageIcon size={48} className="mb-2 opacity-50" />
           <p>{placeholderText}</p>
         </div>
@@ -324,63 +380,76 @@ export default function PicShineAiPage() {
 
 
   return (
-    <main className="flex flex-col items-center justify-start min-h-screen bg-background p-4 sm:p-6 md:p-8 font-body">
-      <Card className="w-full max-w-5xl shadow-2xl rounded-xl overflow-hidden bg-card mt-8 mb-8">
-        <CardHeader className="text-center bg-gradient-to-r from-primary via-accent to-primary text-primary-foreground p-6 sm:p-8">
-          <div className="flex items-center justify-center mb-2">
-            <Sparkles size={36} className="mr-3" />
-            <CardTitle className="text-2xl sm:text-3xl font-headline">PicShine AI</CardTitle>
-          </div>
-          <CardDescription className="text-primary-foreground/90 text-sm sm:text-base">
-            Make your photos shine! Enhance, restore, and colorize with the power of AI.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 md:p-10 space-y-8">
+    <div className="min-h-screen flex flex-col bg-background text-[rgb(var(--foreground))]">
+      <AppHeader />
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <div className="md:col-span-3 space-y-4">
+      <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
+        {/* Hero Section */}
+        <section id="home" className="text-center my-12 md:my-16">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
+              Enhance Your Photos with AI
+            </span>
+          </h2>
+          <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
+            Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
+          </p>
+        </section>
+
+        {/* Ad placeholder - styled to match user request */}
+        <div className="ad-placeholder-container my-8">
+            <div className="ad-label">Advertisement</div>
+            <p className="text-sm text-[rgb(var(--muted-foreground))]">Your Ad Unit: ca-app-pub-2900494836662252/1153507362</p>
+        </div>
+
+        {/* Main Enhancement Tool */}
+        <section className="glass-card p-6 md:p-8 rounded-2xl mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-3 space-y-6">
               <label
                 htmlFor="imageUpload"
-                className={`flex flex-col items-center justify-center w-full h-48 sm:h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-accent/10 transition-colors duration-200 ${isDragging ? 'border-primary ring-2 ring-primary' : 'border-accent'}`}
+                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200 
+                            ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'} 
+                            bg-[rgba(var(--card-bg-rgb),0.2)]`}
                 aria-busy={isLoading}
                 aria-disabled={isLoading}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <UploadCloud className="w-10 h-10 sm:w-12 sm:h-12 mb-3 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
+                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                  <UploadCloud className={`w-12 h-12 mb-4 ${isDragging ? 'text-[rgb(var(--primary-start-rgb))]' : 'text-[rgb(var(--muted-foreground))]'}`} />
+                  <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
+                    <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag and drop
                   </p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF, WEBP (Max 5MB)</p>
-                  {fileName && !isLoading && <p className="text-xs text-primary-foreground/80 mt-2 bg-accent/50 px-2 py-1 rounded">Selected: {fileName}</p>}
-                  {isLoading && <p className="text-xs text-primary-foreground/80 mt-2">Processing: {fileName}</p>}
+                  <p className="text-xs text-[rgb(var(--muted-foreground))]">PNG, JPG, GIF, WEBP (Max 5MB)</p>
+                  {fileName && !isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2 bg-[rgba(var(--primary-start-rgb),0.1)] px-2 py-1 rounded-md">{fileName}</p>}
+                  {isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2">Processing: {fileName}</p>}
                 </div>
                 <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
               </label>
 
               {isLoading && (
                 <div className="flex flex-col items-center justify-center space-y-3 p-4">
-                  <Loader2 className="h-10 w-10 sm:h-12 sm:h-12 animate-spin text-primary" />
-                  <p className="text-sm text-center text-muted-foreground">{loadingMessage}</p>
+                  <Loader2 className="h-12 w-12 animate-spin text-[rgb(var(--primary-start-rgb))]" />
+                  <p className="text-sm text-center text-[rgb(var(--muted-foreground))]">{loadingMessage}</p>
                 </div>
               )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90"
+                  className="gradient-button w-full py-3 text-base"
                   aria-label="Smart enhance and upscale uploaded image"
                 >
-                  {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Star className="mr-2 h-5 w-5" />}
+                  {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
                   Smart Enhance
                 </Button>
                 <Button
                   onClick={handleColorize}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-teal-500 to-blue-500 text-white hover:opacity-90"
+                  className="gradient-button w-full py-3 text-base"
                   aria-label="Colorize uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Colorizing") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Palette className="mr-2 h-5 w-5" />}
@@ -389,81 +458,84 @@ export default function PicShineAiPage() {
                  <Button
                   onClick={handleRemoveScratches}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:opacity-90"
+                  className="gradient-button w-full py-3 text-base sm:col-span-2"
                   aria-label="Remove scratches from uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Removing scratches") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Brush className="mr-2 h-5 w-5" />}
                   Remove Scratches
                 </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <Button
                   onClick={handleDownload}
                   disabled={!enhancedImage || isLoading}
-                  className="w-full text-sm sm:text-base px-3 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-green-500 text-white hover:bg-green-600"
+                  className="bg-[rgba(var(--primary-end-rgb),0.8)] hover:bg-[rgb(var(--primary-end-rgb))] text-white w-full py-3 text-base rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                   aria-label="Download enhanced image"
                 >
                   <Download className="mr-2 h-5 w-5" /> Download
                 </Button>
+                 <Button
+                    onClick={handleReset}
+                    variant="outline"
+                    disabled={isLoading || (!originalImage && !enhancedImage)}
+                    className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 
+                               border-[rgb(var(--muted-foreground))] text-[rgb(var(--muted-foreground))] hover:bg-[rgba(var(--accent),0.2)] hover:text-[rgb(var(--foreground))]"
+                    aria-label="Reset images and selection"
+                  >
+                    <RotateCcw className="mr-2 h-5 w-5" /> Reset
+                  </Button>
               </div>
-               <Button
-                  onClick={handleReset}
-                  variant="outline"
-                  disabled={isLoading || (!originalImage && !enhancedImage)}
-                  className="w-full text-base px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 border-foreground/50 text-foreground hover:bg-accent/20 mt-3"
-                  aria-label="Reset images and selection"
-                >
-                  <RotateCcw className="mr-2 h-5 w-5" /> Reset All
-                </Button>
-              <p className="text-xs text-center text-muted-foreground pt-2">Daily enhancements remaining: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
-
+              <p className="text-xs text-center text-[rgb(var(--muted-foreground))] pt-2">Daily enhancements remaining: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
             </div>
-            <div className="md:col-span-2 space-y-2">
-                <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
-                    <p className="font-semibold">Advertisement</p>
-                    <p className="text-xs mt-1">Placeholder for AdMob Unit:</p>
-                    <p className="text-xs font-mono">ca-app-pub-2900494836662252/1153507362</p>
-                </div>
+
+            <div className="lg:col-span-2 space-y-4">
+               <div className="ad-placeholder-container">
+                  <div className="ad-label">Advertisement Area 1</div>
+                   <p className="text-sm text-[rgb(var(--muted-foreground))]">Integrate your ad network here.</p>
+                   <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">(e.g., AdSense or other display ad)</p>
+              </div>
                 <Button
                   onClick={handleUpgradePro}
-                  className="w-full text-base px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white"
+                  className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                  style={{background: 'linear-gradient(45deg, #FDB813, #F5821F, #E1306C)', color: 'white'}}
                   aria-label="Upgrade to Pro"
                 >
-                  <Star className="mr-2 h-5 w-5" /> Upgrade to Pro (Coming Soon)
+                  <Crown className="mr-2 h-5 w-5" /> Upgrade to Pro
                 </Button>
-                 <div className="bg-gray-100 dark:bg-gray-800 p-3 mt-2 rounded-lg text-center text-sm text-gray-600 dark:text-gray-300 shadow">
-                    <p className="font-semibold">Advertisement</p>
-                    <p className="text-xs mt-1">This is a visual ad placeholder.</p>
-                    <p className="text-xs mt-1">Integrate your ad network here.</p>
+                 <div className="ad-placeholder-container">
+                    <div className="ad-label">Advertisement Area 2</div>
+                    <p className="text-sm text-[rgb(var(--muted-foreground))]">Visual ad placeholder.</p>
                 </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-10">
             <div className="space-y-3">
-              <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Original Image</h3>
+              <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original Image</h3>
               <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." data-ai-hint="uploaded old photo" />
             </div>
             <div className="space-y-3">
-              <h3 className="text-lg sm:text-xl font-headline text-center text-foreground">Enhanced Image</h3>
+              <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
               <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="restored photo" />
             </div>
           </div>
 
           {userHistory.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-border">
-              <h3 className="text-xl sm:text-2xl font-headline text-center text-foreground mb-6 flex items-center justify-center">
-                <HistoryIcon className="mr-3 h-6 w-6 text-primary" /> Your Recent Enhancements
+            <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
+              <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] mb-6 flex items-center justify-center">
+                <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" /> Your Recent Enhancements
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {userHistory.map((item) => (
                   <Card
                     key={item.id}
-                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow duration-200 group bg-card"
+                    className="glass-card overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-200 group !rounded-lg border-transparent hover:border-[rgb(var(--primary-start-rgb))]"
                     onClick={() => loadFromHistory(item)}
                     title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
                   >
-                    <div className="aspect-square bg-muted/30 flex items-center justify-center relative">
-                      <img src={item.enhancedImage} alt={`Enhanced ${item.operation}`} className="max-h-full max-w-full object-contain" />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center text-white p-2 text-center">
+                    <div className="aspect-square bg-[rgba(var(--card-bg-rgb),0.2)] flex items-center justify-center relative p-1">
+                      <img src={item.enhancedImage} alt={`Enhanced ${item.operation}`} className="max-h-full max-w-full object-contain rounded-md" />
+                      <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-2 text-center">
                         <p className="text-xs font-semibold">{item.operation}</p>
                         {item.fileName && <p className="text-[10px] truncate w-full">{item.fileName}</p>}
                       </div>
@@ -473,33 +545,65 @@ export default function PicShineAiPage() {
               </div>
             </div>
           )}
+        </section>
 
-        </CardContent>
-      </Card>
-      <footer className="text-center py-8 text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} PicShine AI. All rights reserved.</p>
-        <p>Powered by Genkit & Google AI. For inquiries, contact: support@picshine.ai</p>
-      </footer>
+        {/* Features Section */}
+        <section id="features" className="my-16 md:my-24">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
+                Powerful AI Features
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[
+                    { icon: <Zap size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
+                    { icon: <Sparkles size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
+                    { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
+                    { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
+                    { icon: <Layers size={32} className="text-yellow-400"/>, title: "Batch Processing", description: "Process multiple images simultaneously with consistent quality results (Pro)." },
+                    { icon: <ShieldCheck size={32} className="text-teal-400"/>, title: "Safe & Secure", description: "Your images are processed securely and deleted after enhancement." },
+                ].map(feature => (
+                    <div key={feature.title} className="glass-card p-6 rounded-xl text-center flex flex-col items-center">
+                        <div className="p-3 rounded-full bg-[rgba(var(--primary-start-rgb),0.1)] mb-4 inline-block">
+                           {feature.icon}
+                        </div>
+                        <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
+                        <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+
+      </main>
+
+      <AppFooter />
 
       <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>
-        <AlertDialogContent>
+        <AlertDialogContent className="glass-card !rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center">
-              <AlertTriangle className="mr-2 h-6 w-6 text-yellow-500" />
-              Daily Limit Reached
+            <AlertDialogTitle className="flex items-center text-[rgb(var(--foreground))]">
+              <AlertTriangle className="mr-2 h-6 w-6 text-yellow-400" />
+              Daily Limit Reached / Pro Feature
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              You have reached your daily limit of {DAILY_LIMIT} free photo enhancements. Please come back tomorrow or consider upgrading to Pro for unlimited access.
+            <AlertDialogDescription className="text-[rgb(var(--muted-foreground))]">
+              You have reached your daily limit of {DAILY_LIMIT} free photo enhancements, or this is a Pro feature. Please come back tomorrow or consider upgrading to Pro for unlimited access and all features.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowLimitPopup(false)}>Got it</AlertDialogAction>
-            <Button onClick={handleUpgradePro} className="bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 text-white">
-                <Star className="mr-2 h-4 w-4" /> Upgrade to Pro
-            </Button>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel
+              onClick={() => setShowLimitPopup(false)}
+              className="bg-transparent border-[rgb(var(--muted-foreground))] text-[rgb(var(--muted-foreground))] hover:bg-[rgba(var(--muted-foreground),0.1)]"
+            >
+              Got it
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUpgradePro}
+              className="gradient-button"
+            >
+                <Crown className="mr-2 h-4 w-4" /> Upgrade to Pro
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </main>
+    </div>
   );
 }
+
