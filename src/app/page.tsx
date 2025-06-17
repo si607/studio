@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, ChangeEvent, useRef, useEffect, DragEvent } from 'react';
+import React, { useState, ChangeEvent, useRef, useEffect, DragEvent, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -101,6 +101,34 @@ export default function PicShineAiPage() {
   const [usageCount, setUsageCount] = useState(0);
   const [showLimitPopup, setShowLimitPopup] = useState(false);
   const [userHistory, setUserHistory] = useState<HistoryItem[]>([]);
+  const hasMounted = useRef(false);
+
+
+  const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
+    try {
+      localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
+    } catch (error) {
+      toast({
+        title: "History Save Warning",
+        description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
+        variant: "default",
+      });
+      try {
+        if (newHistory.length > 0) {
+          localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
+        } else {
+          localStorage.setItem('picShineAiHistory', JSON.stringify([]));
+        }
+      } catch (fallbackError) {
+        console.error("Error saving even the latest history item to localStorage:", fallbackError);
+        toast({
+          title: "History Save Failed",
+          description: "Unable to save any enhancement history due to critical browser storage limits. Your session history won't be preserved.",
+          variant: "destructive",
+        });
+      }
+    }
+  }, [toast]);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -125,47 +153,25 @@ export default function PicShineAiPage() {
             setUserHistory(parsedHistory);
         } else {
             setUserHistory([]);
-            localStorage.removeItem('picShineAiHistory');
+            localStorage.removeItem('picShineAiHistory'); 
         }
       } catch (error) {
         setUserHistory([]);
         localStorage.removeItem('picShineAiHistory');
       }
     }
+    hasMounted.current = true;
   }, []);
 
-  const updateLocalStorageHistory = (newHistory: HistoryItem[]) => {
-    try {
-      // Attempt to save the potentially full new history (up to HISTORY_LIMIT items)
-      localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
-    } catch (error) {
-      // This block executes if the above setItem fails (e.g., quota exceeded)
-      toast({
-        title: "History Save Warning",
-        description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default",
-      });
-      try {
-        // Fallback: Attempt to save only the most recent item
-        if (newHistory.length > 0) {
-          localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
-        } else {
-          // If newHistory is empty (e.g., after reset), save an empty array
-          localStorage.setItem('picShineAiHistory', JSON.stringify([]));
-        }
-      } catch (fallbackError) {
-        console.error("Error saving even the latest history item to localStorage:", fallbackError);
-        toast({
-          title: "History Save Failed",
-          description: "Unable to save any enhancement history due to critical browser storage limits. Your session history won't be preserved.",
-          variant: "destructive",
-        });
-      }
+  useEffect(() => {
+    if (!hasMounted.current) {
+      return;
     }
-  };
+    updateLocalStorageHistory(userHistory);
+  }, [userHistory, updateLocalStorageHistory]);
 
-  const addHistoryItem = (original: string, enhanced: string, operation: string, currentFileName: string | null) => {
-    if (!originalImage) return;
+
+  const addHistoryItem = (enhanced: string, operation: string, currentFileName: string | null) => {
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       enhancedImage: enhanced,
@@ -173,11 +179,7 @@ export default function PicShineAiPage() {
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
     };
-    setUserHistory(prevHistory => {
-      const updatedHistory = [newItem, ...prevHistory].slice(0, HISTORY_LIMIT);
-      updateLocalStorageHistory(updatedHistory);
-      return updatedHistory;
-    });
+    setUserHistory(prevHistory => [newItem, ...prevHistory].slice(0, HISTORY_LIMIT));
   };
 
   const checkAndIncrementUsage = (): boolean => {
@@ -283,7 +285,7 @@ export default function PicShineAiPage() {
     try {
       const result = await enhancementFn({ photoDataUri: originalImage });
       setEnhancedImage(result.enhancedPhotoDataUri);
-      addHistoryItem(originalImage, result.enhancedPhotoDataUri, operationName, fileName);
+      addHistoryItem(result.enhancedPhotoDataUri, operationName, fileName);
       toast({
         title: `Image ${operationName}!`,
         description: `Your image has been successfully ${operationName.toLowerCase()}.`,
@@ -349,7 +351,7 @@ export default function PicShineAiPage() {
   };
 
   const handleUpgradePro = () => {
-    setShowLimitPopup(true); // Re-use existing limit popup for pro features
+    setShowLimitPopup(true); 
   };
 
   const loadFromHistory = (item: HistoryItem) => {
@@ -383,7 +385,6 @@ export default function PicShineAiPage() {
       <AppHeader />
 
       <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
-        {/* Hero Section */}
         <section id="home" className="text-center my-12 md:my-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
             <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
@@ -395,12 +396,9 @@ export default function PicShineAiPage() {
           </p>
         </section>
 
-        {/* Ad placeholder - targeted by ad script */}
         <div id="container-242b734757198216a6ef5b94eae86475" className="ad-placeholder-container my-8">
-            {/* This container is targeted by the ad script. Content will be injected by the script. */}
         </div>
 
-        {/* Main Enhancement Tool */}
         <section className="glass-card p-6 md:p-8 rounded-2xl mb-12">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div className="lg:col-span-3 space-y-6">
@@ -545,7 +543,6 @@ export default function PicShineAiPage() {
           )}
         </section>
 
-        {/* Features Section */}
         <section id="features" className="my-16 md:my-24">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
                 Powerful AI Features
