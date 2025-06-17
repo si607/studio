@@ -104,7 +104,7 @@ export default function PicShineAiPage() {
   const hasMounted = useRef(false);
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
-    if (!hasMounted.current) return; // Don't save during initial load
+    if (!hasMounted.current) return;
     try {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
@@ -180,8 +180,6 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    // Mark as mounted AFTER initial data load attempts
-    // Use a timeout to ensure this runs after the very first render cycle completes
     const timer = setTimeout(() => {
       hasMounted.current = true;
     }, 0);
@@ -189,8 +187,6 @@ export default function PicShineAiPage() {
   }, []);
 
   useEffect(() => {
-    // This effect now handles persisting history changes to localStorage
-    // It runs only after the component has mounted and userHistory changes.
     if (hasMounted.current) {
       updateLocalStorageHistory(userHistory);
     }
@@ -205,7 +201,6 @@ export default function PicShineAiPage() {
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
     };
-    // This now only updates the state. The useEffect above will handle localStorage.
     setUserHistory(prevHistory => [newItem, ...prevHistory].slice(0, HISTORY_LIMIT));
   };
 
@@ -308,6 +303,7 @@ export default function PicShineAiPage() {
     if (!checkAndIncrementUsage()) return;
 
     setIsLoading(true);
+    setEnhancedImage(null); // Clear previous enhanced image
     setLoadingMessage(loadingText);
     try {
       const result = await enhancementFn({ photoDataUri: originalImage });
@@ -319,23 +315,30 @@ export default function PicShineAiPage() {
         icon: <CheckCircle2 className="h-5 w-5 text-green-400" />,
       });
     } catch (error: any) {
-      console.error(`Error ${operationName.toLowerCase()} image:`, error);
+      console.error(`Error performing ${operationName}:`, error);
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       
       if (error instanceof Error) {
-        if (error.message.includes("AI model did not return an image")) {
-          errorMessage = error.message;
-        } else if (error.message.includes("blocked")) {
+        const lowerCaseErrorMessage = error.message.toLowerCase();
+        if (lowerCaseErrorMessage.includes("an error occurred in the server components render")) {
+          errorMessage = `IMPORTANT: AI enhancement failed due to a server-side issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often due to Google AI API key, billing, or permissions problems in your production setup.`;
+        } else if (lowerCaseErrorMessage.includes("ai model did not return an image")) {
+          errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters or an issue with the input image. Try a different image or adjust your request.`;
+        } else if (lowerCaseErrorMessage.includes("blocked")) {
           errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
-        } else if (error.message.toLowerCase().includes("an error occurred in the server components render")) {
-          errorMessage = `Important: A critical server-side error occurred with the AI enhancement. You MUST check your Firebase Function server logs. Look for detailed error messages from Google AI or a Next.js 'digest' value. This is often due to API key, billing, or permissions issues in your production environment. Client saw: ${error.message}`;
+        } else if (lowerCaseErrorMessage.includes("api key not valid") || lowerCaseErrorMessage.includes("permission denied") || lowerCaseErrorMessage.includes("authentication failed")) {
+          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup.`;
+        } else if (lowerCaseErrorMessage.includes("quota") || lowerCaseErrorMessage.includes("limit")) {
+          errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later.`;
+        } else if (lowerCaseErrorMessage.includes("billing account not found")) {
+          errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup.`;
         } else {
           errorMessage = `Error: ${error.message}`;
         }
       }
       
       toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
-       setEnhancedImage(null);
+      setEnhancedImage(null); // Ensure UI is cleared on error
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
