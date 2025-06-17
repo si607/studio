@@ -63,7 +63,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
       }
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
-        console.error('[smartEnhanceImageFlow] Error during AI generation:', e);
+        console.error('[smartEnhanceImageFlow] Detailed error during AI generation (check for original error message and Next.js digest if applicable):', e);
         let clientErrorMessage = 'Photo enhancement failed due to an unexpected server error. Please check server logs for details.';
         if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('html')) {
             if (e.message.includes('API key not valid') || e.message.includes('permission denied') || e.message.includes('Authentication failed')) {
