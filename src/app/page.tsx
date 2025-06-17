@@ -103,7 +103,6 @@ export default function PicShineAiPage() {
   const [userHistory, setUserHistory] = useState<HistoryItem[]>([]);
   const hasMounted = useRef(false);
 
-
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
     try {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
@@ -155,11 +154,9 @@ export default function PicShineAiPage() {
       try {
         const parsedHistory = JSON.parse(storedHistory);
         if (Array.isArray(parsedHistory)) {
-          // Further validation for history items can be added here if needed
           setUserHistory(parsedHistory.filter(item => typeof item === 'object' && item !== null && item.id && item.enhancedImage && item.operation));
         } else {
-          // If parsedHistory is not an array (e.g. null or other types from corrupted data)
-          console.warn("Stored history is not an array, clearing.");
+          console.warn("Stored history is not an array or is null, clearing.");
           setUserHistory([]);
           localStorage.removeItem('picShineAiHistory');
         }
@@ -169,9 +166,6 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory');
       }
     }
-    // Set hasMounted to true after initial load effects are done
-    // This ensures subsequent userHistory changes trigger updateLocalStorageHistory
-    // but not the initial load from localStorage itself.
     requestAnimationFrame(() => {
         hasMounted.current = true;
     });
@@ -501,7 +495,7 @@ export default function PicShineAiPage() {
             <div className="lg:col-span-2 space-y-4">
                <div className="ad-placeholder-container">
                   <div className="ad-label">Advertisement Area 1</div>
-                   <p className="text-sm text-[rgb(var(--muted-foreground))]">Integrate your ad network here.</p>
+                   <p className="text-sm text-[rgb(var(--muted-foreground))]">Reference Ad ID: ca-app-pub-2900494836662252/1153507362</p>
                    <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">(e.g., AdSense or other display ad)</p>
               </div>
                 <Button
@@ -615,6 +609,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
-
-    
