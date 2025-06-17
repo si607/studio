@@ -147,6 +147,7 @@ export default function PicShineAiPage() {
           setUsageCount(0);
         }
       } catch (e) {
+        console.error("Error parsing usage from localStorage, resetting:", e);
         localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
@@ -178,9 +179,7 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    requestAnimationFrame(() => {
-        hasMounted.current = true;
-    });
+    hasMounted.current = true;
   }, []);
 
   useEffect(() => {
@@ -311,16 +310,22 @@ export default function PicShineAiPage() {
         description: `Your image has been successfully ${operationName.toLowerCase()}.`,
         icon: <CheckCircle2 className="h-5 w-5 text-green-400" />,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error ${operationName.toLowerCase()} image:`, error);
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
-      if (error instanceof Error && error.message.includes("AI model did not return an image")) {
-        errorMessage = error.message;
-      } else if (error instanceof Error && error.message.includes("blocked")) {
-        errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
-      } else if (error instanceof Error) {
-        errorMessage = `Error: ${error.message}`;
+      
+      if (error instanceof Error) {
+        if (error.message.includes("AI model did not return an image")) {
+          errorMessage = error.message;
+        } else if (error.message.includes("blocked")) {
+          errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
+        } else if (error.message.toLowerCase().includes("an error occurred in the server components render")) {
+          errorMessage = `A server-side error occurred. Please check the server logs (e.g., Firebase Function logs) for a detailed error message or digest. The original client message was: ${error.message}`;
+        } else {
+          errorMessage = `Error: ${error.message}`;
+        }
       }
+      
       toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
        setEnhancedImage(null);
     } finally {
@@ -622,3 +627,5 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
+    
