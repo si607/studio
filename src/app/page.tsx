@@ -112,12 +112,12 @@ export default function PicShineAiPage() {
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default", 
+        variant: "default",
       });
       try {
         if (newHistory.length > 0) {
           localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
-           toast({ 
+           toast({
              title: "Partial History Saved",
              description: "Only your most recent enhancement could be saved due to storage limits.",
              variant: "default",
@@ -137,6 +137,7 @@ export default function PicShineAiPage() {
   }, [toast]);
 
   useEffect(() => {
+    hasMounted.current = true; // Set this early, actual loading happens after
     const today = new Date().toISOString().split('T')[0];
     const storedUsage = localStorage.getItem('picShineAiUsage');
     if (storedUsage) {
@@ -162,7 +163,7 @@ export default function PicShineAiPage() {
       try {
         const parsedHistory = JSON.parse(storedHistory);
          if (Array.isArray(parsedHistory)) {
-          const validHistory = parsedHistory.filter(item => 
+          const validHistory = parsedHistory.filter(item =>
             typeof item === 'object' && item !== null &&
             item.id && typeof item.id === 'string' &&
             item.enhancedImage && typeof item.enhancedImage === 'string' &&
@@ -173,15 +174,14 @@ export default function PicShineAiPage() {
         } else {
           console.warn("Stored history is not an array or is null, clearing.");
           setUserHistory([]);
-          localStorage.removeItem('picShineAiHistory'); 
+          localStorage.removeItem('picShineAiHistory');
         }
       } catch (error) {
         console.error("Error parsing history from localStorage, clearing:", error);
         setUserHistory([]);
-        localStorage.removeItem('picShineAiHistory'); 
+        localStorage.removeItem('picShineAiHistory');
       }
     }
-    hasMounted.current = true; 
   }, []);
 
   useEffect(() => {
@@ -301,7 +301,7 @@ export default function PicShineAiPage() {
     if (!checkAndIncrementUsage()) return;
 
     setIsLoading(true);
-    setEnhancedImage(null); 
+    setEnhancedImage(null);
     setLoadingMessage(loadingText);
     try {
       const result = await enhancementFn({ photoDataUri: originalImage });
@@ -314,17 +314,23 @@ export default function PicShineAiPage() {
       });
     } catch (error: any) {
       console.error(`Error performing ${operationName}:`, error);
-      setEnhancedImage(null); 
+      setEnhancedImage(null);
 
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
-      
+
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
-        if (lowerCaseErrorMessage.includes("an error occurred in the server components render")) {
+
+        // Check for generic server-side rendering errors or network issues first
+        if (lowerCaseErrorMessage.includes("an error occurred in the server components render") ||
+            lowerCaseErrorMessage.includes("failed to fetch") || // Catch generic network failures
+            lowerCaseErrorMessage.includes("internal server error") || // Catch other generic 500s
+            (error.message.includes("Google AI") && error.message.includes("failed") && !lowerCaseErrorMessage.includes("api key") && !lowerCaseErrorMessage.includes("billing") && !lowerCaseErrorMessage.includes("quota") && !lowerCaseErrorMessage.includes("blocked")) // Heuristic for unclassified Google AI errors
+        ) {
           errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes("ai model did not return an image")) {
           errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters or an issue with the input image. Try a different image or adjust your request.`;
-        } else if (lowerCaseErrorMessage.includes("blocked")) {
+        } else if (lowerCaseErrorMessage.includes("blocked by safety setting") || lowerCaseErrorMessage.includes("safety policy violation")) {
           errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (lowerCaseErrorMessage.includes("api key not valid") || lowerCaseErrorMessage.includes("permission denied") || lowerCaseErrorMessage.includes("authentication failed")) {
           errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup and Firebase Function logs.`;
@@ -332,14 +338,16 @@ export default function PicShineAiPage() {
           errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("billing account not found") || lowerCaseErrorMessage.includes("billing")) {
           errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
-        } else if (lowerCaseErrorMessage.includes("html")) { 
+        } else if (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && lowerCaseErrorMessage.length < 300) { // Check for HTML error snippets
             errorMessage = `Unexpected Error: The server returned an HTML error page instead of AI data. PLEASE CHECK FIREBASE FUNCTION LOGS. This can be due to severe misconfiguration or outages.`;
         } else {
-          errorMessage = `Error during ${operationName.toLowerCase()}: ${error.message}`;
+          // Provide a snippet of the error if it's not too long or generic HTML
+          const detail = error.message.length > 150 || error.message.toLowerCase().includes("<html") ? "See server logs for details." : error.message;
+          errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
       }
-      
-      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 9000 });
+
+      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 10000 });
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -388,12 +396,12 @@ export default function PicShineAiPage() {
   };
 
   const handleUpgradePro = () => {
-    setShowLimitPopup(true); 
+    setShowLimitPopup(true);
   };
 
   const loadFromHistory = (item: HistoryItem) => {
-    setOriginalImage(item.enhancedImage); 
-    setEnhancedImage(item.enhancedImage); 
+    setOriginalImage(item.enhancedImage);
+    setEnhancedImage(item.enhancedImage);
     setFileName(item.fileName || `history_image_${item.id}.png`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     toast({
@@ -442,8 +450,8 @@ export default function PicShineAiPage() {
             <div className="lg:col-span-3 space-y-6">
               <label
                 htmlFor="imageUpload"
-                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200 
-                            ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'} 
+                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
+                            ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
                             bg-[rgba(var(--card-bg-rgb),0.2)]`}
                 aria-busy={isLoading}
                 aria-disabled={isLoading}
@@ -512,7 +520,7 @@ export default function PicShineAiPage() {
                     onClick={handleReset}
                     variant="outline"
                     disabled={isLoading || (!originalImage && !enhancedImage)}
-                    className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 
+                    className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105
                                border-[rgb(var(--muted-foreground))] text-[rgb(var(--muted-foreground))] hover:bg-[rgba(var(--accent),0.2)] hover:text-[rgb(var(--foreground))]"
                     aria-label="Reset images and selection"
                   >
@@ -639,7 +647,6 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
     
 
     
