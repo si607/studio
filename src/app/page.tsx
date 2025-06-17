@@ -330,32 +330,34 @@ export default function PicShineAiPage() {
 
         if (
           lowerCaseErrorMessage.includes('an error occurred in the server components render') ||
-          (originalMsg.includes("Google AI") && originalMsg.includes("failed")) ||
+          (originalMsg.includes("google ai") && originalMsg.includes("failed")) || // Check for "Google AI" and "failed"
           lowerCaseErrorMessage.includes('internal server error') ||
           lowerCaseErrorMessage.includes('failed to fetch') ||
           (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300) || // HTML error snippet
-          originalMsg.toLowerCase().startsWith('critical: ai enhancement failed')
+          originalMsg.toLowerCase().startsWith('critical: ai enhancement failed') ||
+          originalMsg.toLowerCase().startsWith('critical: photo enhancement failed') ||
+          originalMsg.toLowerCase().startsWith('critical: photo colorization failed') ||
+          originalMsg.toLowerCase().startsWith('critical: scratch removal failed')
         ) {
           errorTitle = "Server-Side AI Error";
-          errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
+          errorMessage = `CRITICAL: AI ${operationName.toLowerCase()} failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes('ai model did not return an image')) {
           errorTitle = "AI Model Error";
-          errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters, an issue with the input image, or a temporary model problem. Try a different image or adjust your request. (Details in server logs if issue persists).`;
+          errorMessage = `AI Error: The model didn't return an image for ${operationName.toLowerCase()}. This could be due to safety filters, an issue with the input image, or a temporary model problem. Try a different image or adjust your request. (Details in server logs if issue persists).`;
         } else if (lowerCaseErrorMessage.includes('blocked by safety setting') || lowerCaseErrorMessage.includes('safety policy violation')) {
           errorTitle = "Content Safety Block";
-          errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
+          errorMessage = `${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (lowerCaseErrorMessage.includes('api key not valid') || lowerCaseErrorMessage.includes('permission denied') || lowerCaseErrorMessage.includes('authentication failed')) {
           errorTitle = "Server Configuration Error";
-          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup and Firebase Function logs.`;
+          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions for ${operationName.toLowerCase()}. Please check server setup and Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes('quota') || lowerCaseErrorMessage.includes('limit')) {
           errorTitle = "Service Limit Reached";
-          errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
+          errorMessage = `Service Limit Reached: The AI service for ${operationName.toLowerCase()} may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes('billing account not found') || lowerCaseErrorMessage.includes('billing')) {
           errorTitle = "Billing Issue";
-          errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
+          errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
         } else {
-          // Fallback for other errors, try to show the original message if concise.
-          const detail = originalMsg.length > 200 ? "An unexpected error occurred. See server logs for more details." : originalMsg;
+          const detail = originalMsg.length > 200 ? `An unexpected error occurred during ${operationName.toLowerCase()}. See server logs for more details.` : originalMsg;
           errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
       }

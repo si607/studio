@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z}from 'genkit';
 
 const ColorizeImageInputSchema = z.object({
   photoDataUri: z
@@ -74,12 +74,12 @@ const colorizeImageFlow = ai.defineFlow(
             const originalMsg = e.message;
 
             if (lowerMsg.includes('an error occurred in the server components render') || 
-                (originalMsg.includes("Google AI") && originalMsg.includes("failed")) ||
+                (originalMsg.toLowerCase().includes("google ai") && originalMsg.toLowerCase().includes("failed")) ||
                 lowerMsg.includes('internal server error') ||
                 lowerMsg.includes('failed to fetch') ||
                 (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMsg.length < 300) 
             ) {
-                 clientErrorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
+                 clientErrorMessage = `CRITICAL: Photo colorization failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
             } else if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed')) {
                 clientErrorMessage = 'Photo colorization failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support.';
             } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
