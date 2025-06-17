@@ -100,6 +100,7 @@ body {
     background: var(--background);
     color: rgb(var(--foreground));
     min-height: 100vh;
+    overflow-x: hidden; /* Prevent accidental horizontal scroll on mobile */
   }
 }
 
