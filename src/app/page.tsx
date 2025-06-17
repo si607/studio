@@ -105,31 +105,25 @@ export default function PicShineAiPage() {
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
     try {
-      // Attempt to save the potentially full new history (up to HISTORY_LIMIT items)
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
-      // This block executes if the above setItem fails (e.g., quota exceeded)
-      // No console.error here, rely on toast for user feedback if fallback also fails.
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
-        variant: "default", // Changed from "destructive" to "default" for less alarm
+        variant: "default", 
       });
       try {
         if (newHistory.length > 0) {
-          // Fallback: Try to save only the MOST RECENT history item
           localStorage.setItem('picShineAiHistory', JSON.stringify([newHistory[0]]));
-           toast({ // Optional: Inform user that only latest was saved if preferred
+           toast({ 
              title: "Partial History Saved",
              description: "Only your most recent enhancement could be saved due to storage limits.",
              variant: "default",
            });
         } else {
-          // If newHistory is empty (e.g., user cleared history), still try to update localStorage
           localStorage.setItem('picShineAiHistory', JSON.stringify([]));
         }
       } catch (fallbackError) {
-        // This block executes if even saving the single latest item fails
         console.error("Critical: Error saving even the latest history item to localStorage:", fallbackError);
         toast({
           title: "History Save Failed",
@@ -153,7 +147,6 @@ export default function PicShineAiPage() {
           setUsageCount(0);
         }
       } catch (e) {
-        // If parsing fails, reset usage
         localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
         setUsageCount(0);
       }
@@ -166,37 +159,31 @@ export default function PicShineAiPage() {
       try {
         const parsedHistory = JSON.parse(storedHistory);
          if (Array.isArray(parsedHistory)) {
-          // Ensure all items in parsedHistory are valid HistoryItem objects
           const validHistory = parsedHistory.filter(item => 
             typeof item === 'object' && item !== null &&
             item.id && typeof item.id === 'string' &&
             item.enhancedImage && typeof item.enhancedImage === 'string' &&
             item.operation && typeof item.operation === 'string' &&
             item.timestamp && typeof item.timestamp === 'number'
-            // item.fileName can be undefined or string
           );
           setUserHistory(validHistory);
         } else {
           console.warn("Stored history is not an array or is null, clearing.");
           setUserHistory([]);
-          localStorage.removeItem('picShineAiHistory'); // Clear corrupted item
+          localStorage.removeItem('picShineAiHistory'); 
         }
       } catch (error) {
         console.error("Error parsing history from localStorage, clearing:", error);
         setUserHistory([]);
-        localStorage.removeItem('picShineAiHistory'); // Clear corrupted item
+        localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    // Ensure hasMounted is set to true *after* initial loading effects are done.
-    // requestAnimationFrame defers this slightly to avoid issues with immediate re-renders.
     requestAnimationFrame(() => {
         hasMounted.current = true;
     });
   }, []);
 
   useEffect(() => {
-    // Only run this effect if the component has mounted and userHistory has actually changed
-    // This prevents saving the initially loaded history back to localStorage redundantly.
     if (!hasMounted.current) {
       return;
     }
@@ -212,7 +199,6 @@ export default function PicShineAiPage() {
       timestamp: Date.now(),
       fileName: currentFileName || undefined,
     };
-    // This state update will trigger the useEffect above to save to localStorage
     setUserHistory(prevHistory => [newItem, ...prevHistory].slice(0, HISTORY_LIMIT));
   };
 
