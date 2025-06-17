@@ -62,8 +62,8 @@ const removeScratchesFlow = ai.defineFlow(
       }
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
-        console.error('[removeScratchesFlow] Detailed error during AI generation (check for original error message and Next.js digest if applicable):', e);
-        let clientErrorMessage = 'Scratch removal failed due to an unexpected server error. Please check server logs for details.';
+        console.error('[removeScratchesFlow] Detailed error during AI generation. Check original error message and Next.js digest (if applicable) in server logs. Original Error:', e);
+        let clientErrorMessage = 'Scratch removal failed due to an unexpected server error. Please check server logs for details like an error digest.';
         if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('html')) {
             if (e.message.includes('API key not valid') || e.message.includes('permission denied') || e.message.includes('Authentication failed')) {
                 clientErrorMessage = 'Scratch removal failed: There seems to be an issue with the server configuration (e.g., API key or permissions). Please contact support.';
@@ -72,7 +72,8 @@ const removeScratchesFlow = ai.defineFlow(
             } else if (e.message.includes('Billing account not found')) {
                  clientErrorMessage = 'Scratch removal failed: Billing account issue. Please contact support.';
             } else {
-                clientErrorMessage = `Scratch removal error: ${e.message}`;
+                const originalMessage = (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('<html')) ? e.message : 'Details in server logs.';
+                clientErrorMessage = `Scratch removal error: ${originalMessage}`;
             }
         }
         throw new Error(clientErrorMessage);
