@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Star, AlertTriangle, Brush, History as HistoryIcon, Camera, Zap, CheckCircle2, Info, AlertCircle, Layers, Settings2, ShieldCheck, Crown } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
@@ -104,7 +104,7 @@ export default function PicShineAiPage() {
   const hasMounted = useRef(false);
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
-    if (!hasMounted.current) return;
+    if (typeof window === 'undefined' || !hasMounted.current) return;
     try {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
@@ -137,50 +137,54 @@ export default function PicShineAiPage() {
   }, [toast]);
 
   useEffect(() => {
-    hasMounted.current = true; // Set this early, actual loading happens after
-    const today = new Date().toISOString().split('T')[0];
-    const storedUsage = localStorage.getItem('picShineAiUsage');
-    if (storedUsage) {
-      try {
-        const { date, count } = JSON.parse(storedUsage);
-        if (date === today && typeof count === 'number') {
-          setUsageCount(count);
-        } else {
-          localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
-          setUsageCount(0);
-        }
-      } catch (e) {
-        console.error("Error parsing usage from localStorage, resetting:", e);
-        localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
-        setUsageCount(0);
-      }
-    } else {
-      localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
-    }
+    if (!hasMounted.current) {
+        hasMounted.current = true;
+        if (typeof window !== 'undefined') {
+            const today = new Date().toISOString().split('T')[0];
+            const storedUsage = localStorage.getItem('picShineAiUsage');
+            if (storedUsage) {
+              try {
+                const { date, count } = JSON.parse(storedUsage);
+                if (date === today && typeof count === 'number') {
+                  setUsageCount(count);
+                } else {
+                  localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
+                  setUsageCount(0);
+                }
+              } catch (e) {
+                console.error("Error parsing usage from localStorage, resetting:", e);
+                localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
+                setUsageCount(0);
+              }
+            } else {
+              localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: 0 }));
+            }
 
-    const storedHistory = localStorage.getItem('picShineAiHistory');
-    if (storedHistory) {
-      try {
-        const parsedHistory = JSON.parse(storedHistory);
-         if (Array.isArray(parsedHistory)) {
-          const validHistory = parsedHistory.filter(item =>
-            typeof item === 'object' && item !== null &&
-            item.id && typeof item.id === 'string' &&
-            item.enhancedImage && typeof item.enhancedImage === 'string' &&
-            item.operation && typeof item.operation === 'string' &&
-            item.timestamp && typeof item.timestamp === 'number'
-          );
-          setUserHistory(validHistory);
-        } else {
-          console.warn("Stored history is not an array or is null, clearing.");
-          setUserHistory([]);
-          localStorage.removeItem('picShineAiHistory');
+            const storedHistory = localStorage.getItem('picShineAiHistory');
+            if (storedHistory) {
+              try {
+                const parsedHistory = JSON.parse(storedHistory);
+                if (Array.isArray(parsedHistory)) {
+                  const validHistory = parsedHistory.filter(item =>
+                    typeof item === 'object' && item !== null &&
+                    item.id && typeof item.id === 'string' &&
+                    item.enhancedImage && typeof item.enhancedImage === 'string' &&
+                    item.operation && typeof item.operation === 'string' &&
+                    item.timestamp && typeof item.timestamp === 'number'
+                  );
+                  setUserHistory(validHistory);
+                } else {
+                  console.warn("Stored history is not an array or is null, clearing.");
+                  setUserHistory([]);
+                  localStorage.removeItem('picShineAiHistory');
+                }
+              } catch (error) {
+                console.error("Error parsing history from localStorage, clearing:", error);
+                setUserHistory([]);
+                localStorage.removeItem('picShineAiHistory');
+              }
+            }
         }
-      } catch (error) {
-        console.error("Error parsing history from localStorage, clearing:", error);
-        setUserHistory([]);
-        localStorage.removeItem('picShineAiHistory');
-      }
     }
   }, []);
 
@@ -210,7 +214,9 @@ export default function PicShineAiPage() {
     const newCount = usageCount + 1;
     setUsageCount(newCount);
     const today = new Date().toISOString().split('T')[0];
-    localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: newCount }));
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('picShineAiUsage', JSON.stringify({ date: today, count: newCount }));
+    }
 
     if (DAILY_LIMIT - newCount <= WARNING_THRESHOLD && DAILY_LIMIT - newCount > 0) {
       toast({
@@ -315,17 +321,17 @@ export default function PicShineAiPage() {
     } catch (error: any) {
       console.error(`Error performing ${operationName}:`, error);
       setEnhancedImage(null);
-
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
 
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
+        const errorOriginalMessage = error.message;
 
-        // Check for generic server-side rendering errors or network issues first
-        if (lowerCaseErrorMessage.includes("an error occurred in the server components render") ||
-            lowerCaseErrorMessage.includes("failed to fetch") || // Catch generic network failures
-            lowerCaseErrorMessage.includes("internal server error") || // Catch other generic 500s
-            (error.message.includes("Google AI") && error.message.includes("failed") && !lowerCaseErrorMessage.includes("api key") && !lowerCaseErrorMessage.includes("billing") && !lowerCaseErrorMessage.includes("quota") && !lowerCaseErrorMessage.includes("blocked")) // Heuristic for unclassified Google AI errors
+        if (lowerCaseErrorMessage.includes("an error occurred in the server components render") || 
+            (errorOriginalMessage.includes("Google AI") && errorOriginalMessage.includes("failed")) || // Match "Google AI ... failed" specifically
+            lowerCaseErrorMessage.includes("internal server error") ||
+            lowerCaseErrorMessage.includes("failed to fetch") || // Common generic network/server error
+            (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && errorOriginalMessage.length < 300) // HTML error snippet check
         ) {
           errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes("ai model did not return an image")) {
@@ -338,15 +344,12 @@ export default function PicShineAiPage() {
           errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("billing account not found") || lowerCaseErrorMessage.includes("billing")) {
           errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
-        } else if (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && lowerCaseErrorMessage.length < 300) { // Check for HTML error snippets
-            errorMessage = `Unexpected Error: The server returned an HTML error page instead of AI data. PLEASE CHECK FIREBASE FUNCTION LOGS. This can be due to severe misconfiguration or outages.`;
         } else {
-          // Provide a snippet of the error if it's not too long or generic HTML
-          const detail = error.message.length > 150 || error.message.toLowerCase().includes("<html") ? "See server logs for details." : error.message;
+          // Fallback for other errors, try to show the original message if concise.
+          const detail = errorOriginalMessage.length > 150 ? "See server logs for details." : errorOriginalMessage;
           errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
       }
-
       toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 10000 });
     } finally {
       setIsLoading(false);
@@ -595,8 +598,8 @@ export default function PicShineAiPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
-                    { icon: <Zap size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
-                    { icon: <Sparkles size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
+                    { icon: <Sparkles size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
+                    { icon: <Zap size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
                     { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
                     { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
                     { icon: <Layers size={32} className="text-yellow-400"/>, title: "Batch Processing", description: "Process multiple images simultaneously with consistent quality results (Pro)." },
@@ -647,6 +650,10 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+    
+
+    
+
     
 
     
