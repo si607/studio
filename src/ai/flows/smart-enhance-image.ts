@@ -64,23 +64,32 @@ const smartEnhanceImageFlow = ai.defineFlow(
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
         console.error(
-          `[smartEnhanceImageFlow] Error during AI generation. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for detailed Firebase/Google AI error messages, API key issues, billing status, or a Next.js error digest. Original error object:`,
+          `[smartEnhanceImageFlow] CRITICAL ERROR during AI generation. CHECK FIREBASE FUNCTION LOGS CAREFULLY. Look for: Next.js error digest, Google AI API error messages, API key issues, billing status, or permission problems. Original error object:`,
           e
         );
-        let clientErrorMessage = 'Photo enhancement failed due to an unexpected server error. Please check server logs for details like an error digest.';
-        if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('html')) {
-            if (e.message.includes('API key not valid') || e.message.includes('permission denied') || e.message.includes('Authentication failed')) {
-                clientErrorMessage = 'Photo enhancement failed: There seems to be an issue with the server configuration (e.g., API key or permissions). Please contact support.';
-            } else if (e.message.includes('quota') || e.message.includes('limit')) {
-                 clientErrorMessage = 'Photo enhancement failed: The service may be experiencing high demand or a quota limit has been reached. Please try again later.';
-            } else if (e.message.includes('Billing account not found')) {
-                 clientErrorMessage = 'Photo enhancement failed: Billing account issue. Please contact support.';
+        let clientErrorMessage = 'Photo enhancement failed due to an unexpected server error. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for details like a Next.js error digest or Google AI API errors.';
+        
+        if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('<html')) {
+            const lowerMsg = e.message.toLowerCase();
+            if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed')) {
+                clientErrorMessage = 'Photo enhancement failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support.';
+            } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
+                 clientErrorMessage = 'Photo enhancement failed: Service demand/quota limit reached. Please try again later. Check Firebase Function logs.';
+            } else if (lowerMsg.includes('billing account not found') || lowerMsg.includes('billing') ) {
+                 clientErrorMessage = 'Photo enhancement failed: Billing account issue. Please check Firebase Function logs and contact support.';
+            } else if (lowerMsg.includes('blocked by safety setting') || lowerMsg.includes('safety policy violation')) {
+                clientErrorMessage = 'Photo enhancement failed: Image blocked by content safety policy. Try a different image.';
+            } else if (lowerMsg.includes('ai model did not return an image')) {
+                 clientErrorMessage = e.message; // Use the specific message from the check
             } else {
-                const originalMessage = (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('<html')) ? e.message : 'Details in server logs.';
-                clientErrorMessage = `Enhancement error: ${originalMessage}`;
+                // For other errors, provide a snippet if it's not too long or generic
+                const originalMessage = e.message.length < 150 ? e.message : 'Details in server logs.';
+                clientErrorMessage = `Enhancement error: ${originalMessage} (Check Firebase Function logs for full details)`;
             }
         }
         throw new Error(clientErrorMessage);
       }
   }
 );
+
+    

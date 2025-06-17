@@ -108,6 +108,7 @@ export default function PicShineAiPage() {
     try {
       localStorage.setItem('picShineAiHistory', JSON.stringify(newHistory));
     } catch (error) {
+      console.warn("Could not save full history to localStorage, attempting to save latest only:", error);
       toast({
         title: "History Save Warning",
         description: "Could not save your full enhancement history due to browser storage limits. Attempting to save only the most recent item.",
@@ -180,10 +181,9 @@ export default function PicShineAiPage() {
         localStorage.removeItem('picShineAiHistory'); 
       }
     }
-    const timer = setTimeout(() => {
-      hasMounted.current = true;
-    }, 0);
-    return () => clearTimeout(timer);
+    // Set hasMounted to true after initial hydration and localStorage access
+    // This ensures localStorage writes only happen client-side after initial setup
+    hasMounted.current = true; 
   }, []);
 
   useEffect(() => {
@@ -303,7 +303,7 @@ export default function PicShineAiPage() {
     if (!checkAndIncrementUsage()) return;
 
     setIsLoading(true);
-    setEnhancedImage(null); // Clear previous enhanced image
+    setEnhancedImage(null); 
     setLoadingMessage(loadingText);
     try {
       const result = await enhancementFn({ photoDataUri: originalImage });
@@ -316,29 +316,33 @@ export default function PicShineAiPage() {
       });
     } catch (error: any) {
       console.error(`Error performing ${operationName}:`, error);
+      setEnhancedImage(null); 
+
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
+        // Check for the generic Next.js server components render error
         if (lowerCaseErrorMessage.includes("an error occurred in the server components render")) {
-          errorMessage = `IMPORTANT: AI enhancement failed due to a server-side issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often due to Google AI API key, billing, or permissions problems in your production setup.`;
+          errorMessage = `CRITICAL: AI enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes("ai model did not return an image")) {
           errorMessage = `AI Error: The model didn't return an image. This could be due to safety filters or an issue with the input image. Try a different image or adjust your request.`;
         } else if (lowerCaseErrorMessage.includes("blocked")) {
           errorMessage = `Enhancement failed: ${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (lowerCaseErrorMessage.includes("api key not valid") || lowerCaseErrorMessage.includes("permission denied") || lowerCaseErrorMessage.includes("authentication failed")) {
-          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup.`;
+          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions. Please check server setup and Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("quota") || lowerCaseErrorMessage.includes("limit")) {
-          errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later.`;
+          errorMessage = `Service Limit Reached: The AI service may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
         } else if (lowerCaseErrorMessage.includes("billing account not found")) {
-          errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup.`;
+          errorMessage = `Billing Issue: Photo enhancement failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
+        } else if (lowerCaseErrorMessage.includes("html")) { 
+            errorMessage = `Unexpected Error: The server returned an HTML error page instead of AI data. PLEASE CHECK FIREBASE FUNCTION LOGS. This can be due to severe misconfiguration or outages.`;
         } else {
-          errorMessage = `Error: ${error.message}`;
+          errorMessage = `Error during ${operationName.toLowerCase()}: ${error.message}`;
         }
       }
       
-      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
-      setEnhancedImage(null); // Ensure UI is cleared on error
+      toast({ title: `${operationName} Failed`, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 9000 });
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -638,3 +642,5 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
+    

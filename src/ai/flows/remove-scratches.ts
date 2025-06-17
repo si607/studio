@@ -58,28 +58,36 @@ const removeScratchesFlow = ai.defineFlow(
         },
       });
       if (!media?.url) {
-        throw new Error('AI model did not return an image. This could be due to content safety filters blocking the request, an issue with the input image, or a temporary model problem. Please try a different image or try again later.');
+        throw new Error('AI model did not return an image for scratch removal. This could be due to content safety filters blocking the request, an issue with the input image, or a temporary model problem. Please try a different image or try again later.');
       }
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
         console.error(
-          `[removeScratchesFlow] Error during AI generation. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for detailed Firebase/Google AI error messages, API key issues, billing status, or a Next.js error digest. Original error object:`,
+          `[removeScratchesFlow] CRITICAL ERROR during AI generation. CHECK FIREBASE FUNCTION LOGS CAREFULLY. Look for: Next.js error digest, Google AI API error messages, API key issues, billing status, or permission problems. Original error object:`,
           e
         );
-        let clientErrorMessage = 'Scratch removal failed due to an unexpected server error. Please check server logs for details like an error digest.';
-        if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('html')) {
-            if (e.message.includes('API key not valid') || e.message.includes('permission denied') || e.message.includes('Authentication failed')) {
-                clientErrorMessage = 'Scratch removal failed: There seems to be an issue with the server configuration (e.g., API key or permissions). Please contact support.';
-            } else if (e.message.includes('quota') || e.message.includes('limit')) {
-                 clientErrorMessage = 'Scratch removal failed: The service may be experiencing high demand or a quota limit has been reached. Please try again later.';
-            } else if (e.message.includes('Billing account not found')) {
-                 clientErrorMessage = 'Scratch removal failed: Billing account issue. Please contact support.';
+        let clientErrorMessage = 'Scratch removal failed due to an unexpected server error. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for details like a Next.js error digest or Google AI API errors.';
+        
+        if (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('<html')) {
+            const lowerMsg = e.message.toLowerCase();
+            if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed')) {
+                clientErrorMessage = 'Scratch removal failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support.';
+            } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
+                 clientErrorMessage = 'Scratch removal failed: Service demand/quota limit reached. Please try again later. Check Firebase Function logs.';
+            } else if (lowerMsg.includes('billing account not found') || lowerMsg.includes('billing')) {
+                 clientErrorMessage = 'Scratch removal failed: Billing account issue. Please check Firebase Function logs and contact support.';
+            } else if (lowerMsg.includes('blocked by safety setting') || lowerMsg.includes('safety policy violation')) {
+                clientErrorMessage = 'Scratch removal failed: Image blocked by content safety policy. Try a different image.';
+            } else if (lowerMsg.includes('ai model did not return an image')) {
+                 clientErrorMessage = e.message; 
             } else {
-                const originalMessage = (e && typeof e.message === 'string' && !e.message.toLowerCase().includes('<html')) ? e.message : 'Details in server logs.';
-                clientErrorMessage = `Scratch removal error: ${originalMessage}`;
+                const originalMessage = e.message.length < 150 ? e.message : 'Details in server logs.';
+                clientErrorMessage = `Scratch removal error: ${originalMessage} (Check Firebase Function logs for full details)`;
             }
         }
         throw new Error(clientErrorMessage);
       }
   }
 );
+
+    
