@@ -521,7 +521,7 @@ export default function PicShineAiPage() {
       const blob = await response.blob();
       const file = new File([blob], fileName || 'picshine-enhanced.png', { type: blob.type });
       
-      if (navigator.share) { // Double check navigator.share before calling
+      if (typeof navigator !== 'undefined' && navigator.share) { // Double check navigator.share before calling
         await navigator.share({
           title: 'Enhanced by PicShine AI',
           text: `Check out this image I enhanced with PicShine AI! Original: ${fileName || 'image'}`,
