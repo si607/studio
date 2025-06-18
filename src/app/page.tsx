@@ -3,14 +3,18 @@
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
+import { focusEnhanceFace } from '@/ai/flows/focus-enhance-face';
+import type { FocusEnhanceFaceInput } from '@/ai/flows/focus-enhance-face';
+
 
 const DAILY_LIMIT = 30;
 const HISTORY_LIMIT = 5;
@@ -102,6 +106,54 @@ export default function PicShineAiPage() {
   const [showLimitPopup, setShowLimitPopup] = useState(false);
   const [userHistory, setUserHistory] = useState<HistoryItem[]>([]);
   const hasMounted = useRef(false);
+
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const [showCameraView, setShowCameraView] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsShareApiAvailable(!!navigator.share);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showCameraView && typeof navigator !== 'undefined' && navigator.mediaDevices) {
+      const getCameraPermission = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+          setHasCameraPermission(true);
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (error) {
+          console.error('Error accessing camera:', error);
+          setHasCameraPermission(false);
+          setShowCameraView(false);
+          toast({
+            variant: 'destructive',
+            title: 'Camera Access Denied',
+            description: 'Please enable camera permissions in your browser settings to use this app.',
+            icon: <AlertCircle className="h-5 w-5" />,
+          });
+        }
+      };
+      getCameraPermission();
+    } else if (!showCameraView && videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+    }
+    return () => { 
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [showCameraView, toast]);
+
 
   const updateLocalStorageHistory = useCallback((newHistory: HistoryItem[]) => {
     if (typeof window === 'undefined' || !hasMounted.current) return;
@@ -256,6 +308,7 @@ export default function PicShineAiPage() {
       reader.onloadend = () => {
         setOriginalImage(reader.result as string);
         setEnhancedImage(null);
+        setShowCameraView(false); 
       };
       reader.onerror = () => {
         toast({
@@ -268,6 +321,30 @@ export default function PicShineAiPage() {
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleCapture = () => {
+    if (videoRef.current && canvasRef.current && hasCameraPermission) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUri = canvas.toDataURL('image/png');
+        setOriginalImage(dataUri);
+        setEnhancedImage(null);
+        setFileName(`capture-${Date.now()}.png`);
+        setShowCameraView(false); 
+        toast({ title: "Image Captured", description: "Image captured from camera.", icon: <CheckCircle2 className="h-5 w-5 text-green-400" /> });
+      } else {
+        toast({ title: "Capture Error", description: "Could not get canvas context.", variant: "destructive" });
+      }
+    } else {
+       toast({ title: "Capture Error", description: "Camera not ready or permission denied.", variant: "destructive" });
+    }
+  };
+
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     handleImageUpload(event.target.files?.[0] || null);
@@ -296,12 +373,13 @@ export default function PicShineAiPage() {
   };
 
   const performEnhancement = async (
-    enhancementFn: (input: { photoDataUri: string }) => Promise<{ enhancedPhotoDataUri: string }>,
+    enhancementFn: (input: any) => Promise<{ enhancedPhotoDataUri: string }>,
     operationName: string,
-    loadingText: string
+    loadingText: string,
+    additionalParams?: Record<string, any>
   ) => {
     if (!originalImage) {
-      toast({ title: "No Image", description: "Please upload an image first.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
+      toast({ title: "No Image", description: "Please upload or capture an image first.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
     if (!checkAndIncrementUsage()) return;
@@ -310,7 +388,8 @@ export default function PicShineAiPage() {
     setEnhancedImage(null);
     setLoadingMessage(loadingText);
     try {
-      const result = await enhancementFn({ photoDataUri: originalImage });
+      const inputData = { photoDataUri: originalImage, ...additionalParams };
+      const result = await enhancementFn(inputData);
       setEnhancedImage(result.enhancedPhotoDataUri);
       addHistoryItem(result.enhancedPhotoDataUri, operationName, fileName);
       toast({
@@ -329,10 +408,7 @@ export default function PicShineAiPage() {
         const originalMsg = error.message; 
 
         if (
-          originalMsg.startsWith('CRITICAL: AI enhancement failed') ||
-          originalMsg.startsWith('CRITICAL: Photo enhancement failed') ||
-          originalMsg.startsWith('CRITICAL: Photo colorization failed') ||
-          originalMsg.startsWith('CRITICAL: Scratch removal failed') ||
+          originalMsg.startsWith('CRITICAL:') || 
           lowerCaseErrorMessage.includes('an error occurred in the server components render') ||
           (lowerCaseErrorMessage.includes("google ai") && (lowerCaseErrorMessage.includes("failed") || lowerCaseErrorMessage.includes("error"))) ||
           lowerCaseErrorMessage.includes('internal server error') ||
@@ -340,7 +416,7 @@ export default function PicShineAiPage() {
           (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>'))
         ) {
           errorTitle = "Server-Side AI Error";
-          errorMessage = `CRITICAL: AI ${operationName.toLowerCase()} failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
+          errorMessage = originalMsg.startsWith('CRITICAL:') ? originalMsg : `CRITICAL: AI ${operationName.toLowerCase()} failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerCaseErrorMessage.includes('ai model did not return an image')) {
           errorTitle = "AI Model Error";
           errorMessage = `AI Error: The model didn't return an image for ${operationName.toLowerCase()}. This could be due to safety filters, an issue with the input image, or a temporary model problem. Try a different image or adjust your request. (Details in server logs if issue persists).`;
@@ -357,7 +433,6 @@ export default function PicShineAiPage() {
           errorTitle = "Billing Issue";
           errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check your Google Cloud project's billing status and ensure it's active and linked correctly. Check Firebase Function logs for more details.`;
         } else {
-          // For very short HTML error snippets (often Next.js dev errors being propagated)
           const isShortHtmlError = lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>');
           if (isShortHtmlError) {
              errorTitle = "Server-Side Application Error";
@@ -386,11 +461,24 @@ export default function PicShineAiPage() {
   const handleRemoveScratches = () => {
     performEnhancement(removeScratches, "Scratches Removed", "Removing scratches from your image...");
   };
+  
+  const handleFocusEnhanceFace = () => {
+    const enhancementStyle = "natural clarity"; 
+    performEnhancement(
+      focusEnhanceFace as (input: FocusEnhanceFaceInput) => Promise<{ enhancedPhotoDataUri: string }>, 
+      "Face Focused", 
+      `Applying ${enhancementStyle} face enhancement...`, 
+      { enhancementStyle }
+    );
+  };
+
 
   const handleReset = () => {
     setOriginalImage(null);
     setEnhancedImage(null);
     setFileName(null);
+    setShowCameraView(false);
+    setHasCameraPermission(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -416,6 +504,37 @@ export default function PicShineAiPage() {
     toast({ title: "Download Started", description: "Your enhanced image is downloading.", icon: <Download className="h-5 w-5" /> });
   };
 
+  const handleShare = async () => {
+    if (!enhancedImage) {
+      toast({ title: "No Enhanced Image", description: "Enhance an image first to share.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
+      return;
+    }
+    if (typeof navigator === 'undefined' || !navigator.share) {
+      toast({ title: "Share Not Supported", description: "Your browser does not support the Web Share API.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
+      return;
+    }
+
+    try {
+      const response = await fetch(enhancedImage);
+      const blob = await response.blob();
+      const file = new File([blob], fileName || 'picshine-enhanced.png', { type: blob.type });
+      
+      await navigator.share({
+        title: 'Enhanced by PicShine AI',
+        text: `Check out this image I enhanced with PicShine AI! Original: ${fileName || 'image'}`,
+        files: [file],
+      });
+      toast({ title: "Shared!", description: "Image shared successfully.", icon: <CheckCircle2 className="h-5 w-5 text-green-400" /> });
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('Share action was cancelled by the user.');
+        return;
+      }
+      console.error('Error sharing:', error);
+      toast({ title: "Share Failed", description: `Could not share the image: ${error.message}`, variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    }
+  };
+
   const handleUpgradePro = () => {
     setShowLimitPopup(true);
   };
@@ -424,6 +543,7 @@ export default function PicShineAiPage() {
     setOriginalImage(item.enhancedImage); 
     setEnhancedImage(item.enhancedImage);
     setFileName(item.fileName || `history_image_${item.id}.png`);
+    setShowCameraView(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     toast({
         title: "Loaded from History",
@@ -449,6 +569,7 @@ export default function PicShineAiPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-[rgb(var(--foreground))]">
       <AppHeader />
+      <canvas ref={canvasRef} className="hidden"></canvas>
 
       <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
         <section id="home" className="text-center my-12 md:my-16">
@@ -463,34 +584,76 @@ export default function PicShineAiPage() {
         </section>
 
         <div id="container-242b734757198216a6ef5b94eae86475" className="ad-placeholder-container my-8">
-           {/* This div is targeted by the ad script */}
         </div>
 
         <section className="glass-card p-6 md:p-8 rounded-2xl mb-12">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div className="lg:col-span-3 space-y-6">
-              <label
-                htmlFor="imageUpload"
-                className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
-                            ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
-                            bg-[rgba(var(--card-bg-rgb),0.2)]`}
-                aria-busy={isLoading}
-                aria-disabled={isLoading}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                  <UploadCloud className={`w-12 h-12 mb-4 ${isDragging ? 'text-[rgb(var(--primary-start-rgb))]' : 'text-[rgb(var(--muted-foreground))]'}`} />
-                  <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
-                    <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-[rgb(var(--muted-foreground))]">PNG, JPG, GIF, WEBP (Max 5MB)</p>
-                  {fileName && !isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2 bg-[rgba(var(--primary-start-rgb),0.1)] px-2 py-1 rounded-md">{fileName}</p>}
-                  {isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2">Processing: {fileName}</p>}
+              {!showCameraView ? (
+                <label
+                  htmlFor="imageUpload"
+                  className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
+                              ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
+                              bg-[rgba(var(--card-bg-rgb),0.2)]`}
+                  aria-busy={isLoading}
+                  aria-disabled={isLoading}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <UploadCloud className={`w-12 h-12 mb-4 ${isDragging ? 'text-[rgb(var(--primary-start-rgb))]' : 'text-[rgb(var(--muted-foreground))]'}`} />
+                    <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
+                      <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag and drop
+                    </p>
+                    <Button type="button" variant="outline" size="sm" className="mt-2 text-xs" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowCameraView(true); }} disabled={isLoading}>
+                      <Camera size={14} className="mr-2" /> Use Camera
+                    </Button>
+                    <p className="text-xs text-[rgb(var(--muted-foreground))] mt-2">PNG, JPG, GIF, WEBP (Max 5MB)</p>
+                    {fileName && !isLoading && !originalImage && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2 bg-[rgba(var(--primary-start-rgb),0.1)] px-2 py-1 rounded-md">{fileName}</p>}
+                    {isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2">Processing: {fileName}</p>}
+                  </div>
+                  <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
+                </label>
+              ) : (
+                <div className="space-y-4">
+                  <Card className="border-[rgba(var(--card-border-rgb),0.2)] bg-[rgba(var(--card-bg-rgb),0.2)]">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Camera Preview</CardTitle>
+                    </CardHeader>
+                    <div className="p-4">
+                      <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
+                      {hasCameraPermission === false && (
+                        <Alert variant="destructive" className="mt-2">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertTitle>Camera Access Denied</AlertTitle>
+                          <AlertDescription>
+                            Please allow camera access in your browser settings to use this feature.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                       {hasCameraPermission === null && (
+                        <Alert variant="default" className="mt-2 border-yellow-400/50 text-yellow-400">
+                           <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>Requesting Camera</AlertTitle>
+                          <AlertDescription>
+                            Attempting to access your camera. Please grant permission if prompted.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  </Card>
+                  <div className="flex gap-2">
+                    <Button onClick={handleCapture} disabled={!hasCameraPermission || isLoading} className="gradient-button w-full">
+                      <Camera className="mr-2 h-5 w-5" /> Capture
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowCameraView(false)} disabled={isLoading} className="w-full">
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
-                <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
-              </label>
+              )}
+
 
               {isLoading && (
                 <div className="flex flex-col items-center justify-center space-y-3 p-4">
@@ -498,7 +661,6 @@ export default function PicShineAiPage() {
                   <p className="text-sm text-center text-[rgb(var(--muted-foreground))]">{loadingMessage}</p>
                 </div>
               )}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
@@ -521,14 +683,23 @@ export default function PicShineAiPage() {
                  <Button
                   onClick={handleRemoveScratches}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base sm:col-span-2"
+                  className="gradient-button w-full py-3 text-base"
                   aria-label="Remove scratches from uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Removing scratches") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Brush className="mr-2 h-5 w-5" />}
                   Remove Scratches
                 </Button>
+                 <Button
+                  onClick={handleFocusEnhanceFace}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="gradient-button w-full py-3 text-base"
+                  aria-label="Focus enhance face in uploaded image"
+                >
+                  {isLoading && loadingMessage.includes("face enhancement") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <User className="mr-2 h-5 w-5" />}
+                  Face Enhance
+                </Button>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Button
                   onClick={handleDownload}
                   disabled={!enhancedImage || isLoading}
@@ -540,12 +711,23 @@ export default function PicShineAiPage() {
                  <Button
                     onClick={handleReset}
                     variant="outline"
-                    disabled={isLoading || (!originalImage && !enhancedImage)}
+                    disabled={isLoading || (!originalImage && !enhancedImage && !showCameraView)}
                     className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105
                                border-[rgb(var(--muted-foreground))] text-[rgb(var(--muted-foreground))] hover:bg-[rgba(var(--accent),0.2)] hover:text-[rgb(var(--foreground))]"
                     aria-label="Reset images and selection"
                   >
                     <RotateCcw className="mr-2 h-5 w-5" /> Reset
+                  </Button>
+                  <Button
+                    onClick={handleShare}
+                    disabled={!enhancedImage || isLoading || !isShareApiAvailable}
+                    variant="outline"
+                    className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105
+                              border-green-500/50 text-green-500 hover:bg-green-500/10 hover:text-green-400 md:col-span-1 disabled:border-gray-500/30 disabled:text-gray-500/50 disabled:hover:bg-transparent"
+                    aria-label="Share enhanced image"
+                    title={!isShareApiAvailable ? "Share not supported on your browser" : "Share enhanced image"}
+                  >
+                    <Share2 className="mr-2 h-5 w-5" /> Share
                   </Button>
               </div>
               <p className="text-xs text-center text-[rgb(var(--muted-foreground))] pt-2">Daily enhancements remaining: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
@@ -575,7 +757,7 @@ export default function PicShineAiPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-10">
             <div className="space-y-3">
               <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original Image</h3>
-              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to see it here." data-ai-hint="uploaded old photo" />
+              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload or capture an image to see it here." data-ai-hint="uploaded old photo" />
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
@@ -617,7 +799,7 @@ export default function PicShineAiPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[
                     { icon: <Sparkles size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
-                    { icon: <Zap size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
+                    { icon: <User size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
                     { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
                     { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
                     { icon: <Layers size={32} className="text-yellow-400"/>, title: "Batch Processing", description: "Process multiple images simultaneously with consistent quality results (Pro)." },
@@ -669,4 +851,3 @@ export default function PicShineAiPage() {
   );
 }
 
-    

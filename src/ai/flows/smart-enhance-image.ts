@@ -46,7 +46,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Dramatically enhance the provided image. Perform a significant upscaling, aiming for at least a 4x resolution increase, ensuring maximum detail and sharpness. Aggressively reduce noise and artifacts. For human faces, bring out fine details, improve skin texture, and enhance eye clarity for a striking, yet natural result. The output should be a remarkably improved, high-definition version of the original, while respecting its core composition."},
+          {text: "Dramatically enhance the provided image. Perform a significant upscaling, aiming for at least a 4x resolution increase, ensuring maximum detail and sharpness. Aggressively reduce noise and artifacts. For human faces, bring out fine details, improve skin texture, and enhance eye clarity for a striking, yet natural result. The output should be a remarkably improved, high-definition version of the original, while respecting its core composition. Also, subtly incorporate a small, semi-transparent watermark 'PicShine AI' in a bottom corner of the image."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
