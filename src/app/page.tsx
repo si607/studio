@@ -113,17 +113,16 @@ export default function PicShineAiPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
 
- useEffect(() => {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) {
-      setIsShareApiAvailable(true);
-    } else {
-      setIsShareApiAvailable(false);
+  useEffect(() => {
+    // This check now runs only on the client, preventing "navigator is not defined"
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      setIsShareApiAvailable(!!navigator.share);
     }
   }, []);
 
 
   useEffect(() => {
-    if (showCameraView && typeof navigator !== 'undefined' && navigator.mediaDevices) {
+    if (showCameraView && typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.mediaDevices) {
       const getCameraPermission = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
@@ -150,7 +149,7 @@ export default function PicShineAiPage() {
         videoRef.current.srcObject = null;
     }
     return () => { 
-      if (videoRef.current && videoRef.current.srcObject) {
+      if (typeof window !== 'undefined' && videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
       }
@@ -512,7 +511,7 @@ export default function PicShineAiPage() {
       toast({ title: "No Enhanced Image", description: "Enhance an image first to share.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
-    if (typeof navigator === 'undefined' || !navigator.share) {
+    if (!isShareApiAvailable) {
       toast({ title: "Share Not Supported", description: "Your browser does not support the Web Share API.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
@@ -522,12 +521,16 @@ export default function PicShineAiPage() {
       const blob = await response.blob();
       const file = new File([blob], fileName || 'picshine-enhanced.png', { type: blob.type });
       
-      await navigator.share({
-        title: 'Enhanced by PicShine AI',
-        text: `Check out this image I enhanced with PicShine AI! Original: ${fileName || 'image'}`,
-        files: [file],
-      });
-      toast({ title: "Shared!", description: "Image shared successfully.", icon: <CheckCircle2 className="h-5 w-5 text-green-400" /> });
+      if (navigator.share) { // Double check navigator.share before calling
+        await navigator.share({
+          title: 'Enhanced by PicShine AI',
+          text: `Check out this image I enhanced with PicShine AI! Original: ${fileName || 'image'}`,
+          files: [file],
+        });
+        toast({ title: "Shared!", description: "Image shared successfully.", icon: <CheckCircle2 className="h-5 w-5 text-green-400" /> });
+      } else {
+        throw new Error("Share API became unavailable unexpectedly.");
+      }
     } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('Share action was cancelled by the user.');
