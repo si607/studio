@@ -12,7 +12,9 @@ if (!apiKey) {
   console.error(
     'CRITICAL GENKIT CONFIG ERROR: GOOGLE_API_KEY environment variable is NOT SET or EMPTY in the Firebase App Hosting environment. AI features WILL FAIL. Ensure this is set as a secure environment variable in your Firebase App Hosting configuration.'
   );
-   console.log('process.env contents:', JSON.stringify(process.env));
+   console.log('Current process.env.GOOGLE_API_KEY value is undefined or empty.');
+   console.log('All available process.env keys:', Object.keys(process.env).join(', '));
+
 } else {
   // Log a portion of the key to confirm it's being read by the application.
   // This helps verify that the environment variable is correctly propagated to the running application.
