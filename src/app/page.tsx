@@ -426,15 +426,18 @@ export default function PicShineAiPage() {
         } else if (lowerCaseErrorMessage.includes('blocked by safety setting') || lowerCaseErrorMessage.includes('safety policy violation')) {
           errorTitle = "Content Safety Block";
           errorMessage = `${operationName} was blocked due to content safety policies. Please try a different image.`;
-        } else if (lowerCaseErrorMessage.includes('api key not valid') || lowerCaseErrorMessage.includes('permission denied') || lowerCaseErrorMessage.includes('authentication failed')) {
+        } else if (lowerCaseErrorMessage.includes('api key not valid') || lowerCaseErrorMessage.includes('permission denied') || lowerCaseErrorMessage.includes('authentication failed') || lowerCaseErrorMessage.includes('api_key_not_valid')) {
           errorTitle = "Server Configuration Error";
           errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions for ${operationName.toLowerCase()}. Please check server setup and Firebase Function logs. Ensure GOOGLE_API_KEY is correctly set as a secure environment variable in Firebase App Hosting.`;
         } else if (lowerCaseErrorMessage.includes('quota') || lowerCaseErrorMessage.includes('limit')) {
           errorTitle = "Service Limit Reached";
           errorMessage = `Service Limit Reached: The AI service for ${operationName.toLowerCase()} may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs and Google Cloud project quotas.`;
-        } else if (lowerCaseErrorMessage.includes('billing account not found') || lowerCaseErrorMessage.includes('billing')) {
+        } else if (lowerCaseErrorMessage.includes('billing account not found') || lowerCaseErrorMessage.includes('billing') || lowerCaseErrorMessage.includes('project_not_linked_to_billing_account')) {
           errorTitle = "Billing Issue";
           errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check your Google Cloud project's billing status and ensure it's active and linked correctly. Check Firebase Function logs for more details.`;
+        } else if (lowerCaseErrorMessage.includes('generative language api has not been used') || lowerCaseErrorMessage.includes('api is not enabled')) {
+          errorTitle = "API Not Enabled";
+          errorMessage = `The Google Generative Language API required for ${operationName.toLowerCase()} is not enabled for your project or has not been used before. Please enable it in the Google Cloud Console and try again. Check Firebase Function logs for more details.`;
         } else {
           const isShortHtmlError = lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>');
           if (isShortHtmlError) {
