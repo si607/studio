@@ -103,5 +103,3 @@ const colorizeImageFlow = ai.defineFlow(
       }
   }
 );
-
-    

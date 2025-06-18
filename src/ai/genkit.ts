@@ -33,5 +33,3 @@ export const ai = genkit({
   ],
   model: 'googleai/gemini-2.0-flash', // Default model for text, image generation uses gemini-2.0-flash-exp
 });
-
-    

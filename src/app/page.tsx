@@ -857,5 +857,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
-    
