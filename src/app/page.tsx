@@ -324,10 +324,9 @@ export default function PicShineAiPage() {
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       let errorTitle = `${operationName} Failed`;
 
-      // Enhanced error parsing
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
-        const originalMsg = error.message; // Preserve original case for specific checks if needed
+        const originalMsg = error.message; 
 
         if (
           originalMsg.startsWith('CRITICAL: AI enhancement failed') ||
@@ -358,7 +357,6 @@ export default function PicShineAiPage() {
           errorTitle = "Billing Issue";
           errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check your Google Cloud project's billing status and ensure it's active and linked correctly. Check Firebase Function logs for more details.`;
         } else {
-          // Fallback for other errors, trying to provide a concise version of the original message
           const detail = originalMsg.length > 200 ? `An unexpected error occurred during ${operationName.toLowerCase()}. See server logs for more details.` : originalMsg;
           errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
@@ -663,3 +661,5 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
+    

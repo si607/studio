@@ -80,7 +80,7 @@ const removeScratchesFlow = ai.defineFlow(
             ) {
                  clientErrorMessage = `CRITICAL: Scratch removal failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
             } else if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed')) {
-                clientErrorMessage = 'Scratch removal failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support.';
+                clientErrorMessage = 'Scratch removal failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support. Ensure GOOGLE_API_KEY is correctly set as a secure environment variable in Firebase App Hosting.';
             } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
                  clientErrorMessage = 'Scratch removal failed: Service demand/quota limit reached. Please try again later. Check Firebase Function logs.';
             } else if (lowerMsg.includes('billing account not found') || lowerMsg.includes('billing')) {
@@ -98,4 +98,6 @@ const removeScratchesFlow = ai.defineFlow(
       }
   }
 );
+    
+
     
