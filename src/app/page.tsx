@@ -113,7 +113,7 @@ export default function PicShineAiPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
 
- useEffect(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
       setIsShareApiAvailable(!!navigator.share);
     } else {
@@ -857,7 +857,5 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
-    
 
     

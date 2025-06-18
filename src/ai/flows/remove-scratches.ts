@@ -100,7 +100,3 @@ const removeScratchesFlow = ai.defineFlow(
 );
 
     
-
-    
-
-    
