@@ -74,7 +74,7 @@ const focusEnhanceFaceFlow = ai.defineFlow(
         let clientErrorMessage = 'Face-focused enhancement failed due to an unexpected server error. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for details like a Next.js error digest or Google AI API errors.';
         const lowerMsg = originalMessage.toLowerCase();
         
-        if (lowerMsg.includes("not available in your country")) {
+        if (lowerMsg.includes("not available in your country") || lowerMsg.includes("image generation is not available in your country")) {
             clientErrorMessage = 'Face-focused enhancement failed: This AI feature is not available in your current region/country. Please check Google Cloud service availability.';
         } else if (originalMessage.startsWith('CRITICAL:') ||
             lowerMsg.includes('an error occurred in the server components render') || 
@@ -104,4 +104,6 @@ const focusEnhanceFaceFlow = ai.defineFlow(
       }
   }
 );
+    
+
     
