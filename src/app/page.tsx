@@ -114,8 +114,8 @@ export default function PicShineAiPage() {
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
-      setIsShareApiAvailable(!!navigator.share);
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) {
+      setIsShareApiAvailable(true);
     } else {
       setIsShareApiAvailable(false);
     }
