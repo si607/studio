@@ -113,9 +113,9 @@ export default function PicShineAiPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) {
-      setIsShareApiAvailable(true);
+ useEffect(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      setIsShareApiAvailable(!!navigator.share);
     } else {
       setIsShareApiAvailable(false);
     }
@@ -522,7 +522,7 @@ export default function PicShineAiPage() {
       const blob = await response.blob();
       const file = new File([blob], fileName || 'picshine-enhanced.png', { type: blob.type });
       
-      if (typeof navigator !== 'undefined' && navigator.share) { 
+      if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) { 
         await navigator.share({
           title: 'Enhanced by PicShine AI',
           text: `Check out this image I enhanced with PicShine AI! Original: ${fileName || 'image'}`,
@@ -858,5 +858,6 @@ export default function PicShineAiPage() {
   );
 }
 
+    
 
     
