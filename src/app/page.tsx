@@ -326,7 +326,7 @@ export default function PicShineAiPage() {
   };
   
   const handleCapture = () => {
-    if (videoRef.current && canvasRef.current && hasCameraPermission) {
+    if (typeof window !== 'undefined' && videoRef.current && canvasRef.current && hasCameraPermission) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -512,7 +512,7 @@ export default function PicShineAiPage() {
       toast({ title: "No Enhanced Image", description: "Enhance an image first to share.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
-    if (!isShareApiAvailable) {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && !navigator.share) {
       toast({ title: "Share Not Supported", description: "Your browser does not support the Web Share API.", variant: "destructive", icon: <Info className="h-5 w-5" /> });
       return;
     }
@@ -530,7 +530,7 @@ export default function PicShineAiPage() {
         });
         toast({ title: "Shared!", description: "Image shared successfully.", icon: <CheckCircle2 className="h-5 w-5 text-green-400" /> });
       } else {
-        throw new Error("Share API became unavailable unexpectedly.");
+        throw new Error("Share API became unavailable unexpectedly or navigator is not defined.");
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -651,7 +651,7 @@ export default function PicShineAiPage() {
                     </div>
                   </Card>
                   <div className="flex gap-2">
-                    <Button onClick={handleCapture} disabled={!hasCameraPermission || isLoading} className="gradient-button w-full">
+                    <Button onClick={handleCapture} disabled={isLoading || (typeof window !== 'undefined' && !hasCameraPermission)} className="gradient-button w-full">
                       <Camera className="mr-2 h-5 w-5" /> Capture
                     </Button>
                     <Button variant="outline" onClick={() => setShowCameraView(false)} disabled={isLoading} className="w-full">
