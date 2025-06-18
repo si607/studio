@@ -79,7 +79,6 @@ const smartEnhanceImageFlow = ai.defineFlow(
         throw new Error(`Failed to fetch or process image from URL: ${input.imageUrl}. Error: ${e.message}`);
       }
     } else {
-      // This case should ideally be caught by Zod refine, but as a fallback:
       throw new Error("No image data provided (either photoDataUri or imageUrl is required).");
     }
 
@@ -105,23 +104,24 @@ const smartEnhanceImageFlow = ai.defineFlow(
       }
       return {enhancedPhotoDataUri: media.url};
     } catch (e: any) {
-        // Consolidate error logging and re-throwing logic
         const originalMessage = (e instanceof Error) ? e.message : String(e);
         console.error(
           `[smartEnhanceImageFlow] CRITICAL ERROR during AI generation or pre-processing. CHECK FIREBASE FUNCTION LOGS CAREFULLY. Original error:`,
           originalMessage,
-          e, // Log the full error object
+          e, 
           JSON.stringify(e, Object.getOwnPropertyNames(e))
         );
         
         let clientErrorMessage = 'Photo enhancement failed due to an unexpected server error. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for details like a Next.js error digest or Google AI API errors.';
         const lowerMsg = originalMessage.toLowerCase();
 
-        if (originalMessage.startsWith('CRITICAL:') ||
+        if (lowerMsg.includes("not available in your country")) {
+            clientErrorMessage = 'Photo enhancement failed: This AI feature is not available in your current region/country. Please check Google Cloud service availability.';
+        } else if (originalMessage.startsWith('CRITICAL:') ||
             lowerMsg.includes('an error occurred in the server components render') ||
             (lowerMsg.includes("google ai") && (lowerMsg.includes("failed") || lowerMsg.includes("error"))) ||
             lowerMsg.includes('internal server error') ||
-            lowerMsg.includes('failed to fetch') || // This can now also be from fetching imageUrl
+            lowerMsg.includes('failed to fetch') || 
             (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMessage.length < 300 && !originalMessage.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')))
         {
              clientErrorMessage = `CRITICAL: Photo enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
@@ -138,7 +138,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
         } else if (lowerMsg.includes('generative language api has not been used') || lowerMsg.includes('api is not enabled')) {
              clientErrorMessage = 'Photo enhancement failed: The Google Generative Language API is not enabled for your project or has not been used before. Please enable it in the Google Cloud Console and try again. Check Firebase Function logs for details.';
         } else if (lowerMsg.includes('failed to fetch or process image from url')) {
-             clientErrorMessage = originalMessage; // Use the specific message from URL fetching
+             clientErrorMessage = originalMessage;
         } else {
             const displayMessage = originalMessage.length < 200 ? originalMessage : 'See server logs for full details.';
             clientErrorMessage = `Enhancement error: ${displayMessage} (Check Firebase Function logs for full details)`;
@@ -147,5 +147,4 @@ const smartEnhanceImageFlow = ai.defineFlow(
       }
   }
 );
-
     
