@@ -324,20 +324,21 @@ export default function PicShineAiPage() {
       let errorMessage = `Could not ${operationName.toLowerCase()} the image. Please try again.`;
       let errorTitle = `${operationName} Failed`;
 
+      // Enhanced error parsing
       if (error instanceof Error) {
         const lowerCaseErrorMessage = error.message.toLowerCase();
-        const originalMsg = error.message;
+        const originalMsg = error.message; // Preserve original case for specific checks if needed
 
         if (
+          originalMsg.startsWith('CRITICAL: AI enhancement failed') ||
+          originalMsg.startsWith('CRITICAL: Photo enhancement failed') ||
+          originalMsg.startsWith('CRITICAL: Photo colorization failed') ||
+          originalMsg.startsWith('CRITICAL: Scratch removal failed') ||
           lowerCaseErrorMessage.includes('an error occurred in the server components render') ||
-          (originalMsg.includes("google ai") && originalMsg.includes("failed")) || // Check for "Google AI" and "failed"
+          (lowerCaseErrorMessage.includes("google ai") && (lowerCaseErrorMessage.includes("failed") || lowerCaseErrorMessage.includes("error"))) ||
           lowerCaseErrorMessage.includes('internal server error') ||
           lowerCaseErrorMessage.includes('failed to fetch') ||
-          (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300) || // HTML error snippet
-          originalMsg.toLowerCase().startsWith('critical: ai enhancement failed') ||
-          originalMsg.toLowerCase().startsWith('critical: photo enhancement failed') ||
-          originalMsg.toLowerCase().startsWith('critical: photo colorization failed') ||
-          originalMsg.toLowerCase().startsWith('critical: scratch removal failed')
+          (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300)
         ) {
           errorTitle = "Server-Side AI Error";
           errorMessage = `CRITICAL: AI ${operationName.toLowerCase()} failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
@@ -349,19 +350,20 @@ export default function PicShineAiPage() {
           errorMessage = `${operationName} was blocked due to content safety policies. Please try a different image.`;
         } else if (lowerCaseErrorMessage.includes('api key not valid') || lowerCaseErrorMessage.includes('permission denied') || lowerCaseErrorMessage.includes('authentication failed')) {
           errorTitle = "Server Configuration Error";
-          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions for ${operationName.toLowerCase()}. Please check server setup and Firebase Function logs.`;
+          errorMessage = `Server Configuration Error: There's an issue with the Google AI API key or permissions for ${operationName.toLowerCase()}. Please check server setup and Firebase Function logs. Ensure GOOGLE_API_KEY is correctly set as a secure environment variable in Firebase App Hosting.`;
         } else if (lowerCaseErrorMessage.includes('quota') || lowerCaseErrorMessage.includes('limit')) {
           errorTitle = "Service Limit Reached";
-          errorMessage = `Service Limit Reached: The AI service for ${operationName.toLowerCase()} may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs.`;
+          errorMessage = `Service Limit Reached: The AI service for ${operationName.toLowerCase()} may be experiencing high demand or a quota limit has been reached. Please try again later. Check Firebase Function logs and Google Cloud project quotas.`;
         } else if (lowerCaseErrorMessage.includes('billing account not found') || lowerCaseErrorMessage.includes('billing')) {
           errorTitle = "Billing Issue";
-          errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check server setup and Firebase Function logs.`;
+          errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check your Google Cloud project's billing status and ensure it's active and linked correctly. Check Firebase Function logs for more details.`;
         } else {
+          // Fallback for other errors, trying to provide a concise version of the original message
           const detail = originalMsg.length > 200 ? `An unexpected error occurred during ${operationName.toLowerCase()}. See server logs for more details.` : originalMsg;
           errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
         }
       }
-      toast({ title: errorTitle, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 12000 });
+      toast({ title: errorTitle, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 15000 });
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -661,4 +663,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-    
