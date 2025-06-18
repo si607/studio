@@ -337,7 +337,7 @@ export default function PicShineAiPage() {
           (lowerCaseErrorMessage.includes("google ai") && (lowerCaseErrorMessage.includes("failed") || lowerCaseErrorMessage.includes("error"))) ||
           lowerCaseErrorMessage.includes('internal server error') ||
           lowerCaseErrorMessage.includes('failed to fetch') ||
-          (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300)
+          (lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>'))
         ) {
           errorTitle = "Server-Side AI Error";
           errorMessage = `CRITICAL: AI ${operationName.toLowerCase()} failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
@@ -357,8 +357,15 @@ export default function PicShineAiPage() {
           errorTitle = "Billing Issue";
           errorMessage = `Billing Issue: ${operationName} failed due to a billing account problem. Please check your Google Cloud project's billing status and ensure it's active and linked correctly. Check Firebase Function logs for more details.`;
         } else {
-          const detail = originalMsg.length > 200 ? `An unexpected error occurred during ${operationName.toLowerCase()}. See server logs for more details.` : originalMsg;
-          errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
+          // For very short HTML error snippets (often Next.js dev errors being propagated)
+          const isShortHtmlError = lowerCaseErrorMessage.includes("<html") && !lowerCaseErrorMessage.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>');
+          if (isShortHtmlError) {
+             errorTitle = "Server-Side Application Error";
+             errorMessage = `CRITICAL: An application error occurred on the server during ${operationName.toLowerCase()}. This is often a coding error in the Next.js backend or AI flow. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error stack trace and digest.`;
+          } else {
+            const detail = originalMsg.length > 200 ? `An unexpected error occurred during ${operationName.toLowerCase()}. See server logs for more details.` : originalMsg;
+            errorMessage = `Error during ${operationName.toLowerCase()}: ${detail}`;
+          }
         }
       }
       toast({ title: errorTitle, description: errorMessage, variant: "destructive", icon: <AlertCircle className="h-5 w-5" />, duration: 15000 });

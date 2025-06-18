@@ -76,7 +76,7 @@ const removeScratchesFlow = ai.defineFlow(
                 (originalMsg.toLowerCase().includes("google ai") && originalMsg.toLowerCase().includes("failed")) ||
                 lowerMsg.includes('internal server error') ||
                 lowerMsg.includes('failed to fetch') ||
-                (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMsg.length < 300) 
+                (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')) 
             ) {
                  clientErrorMessage = `CRITICAL: Scratch removal failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
             } else if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed')) {
@@ -98,6 +98,5 @@ const removeScratchesFlow = ai.defineFlow(
       }
   }
 );
-    
 
     
