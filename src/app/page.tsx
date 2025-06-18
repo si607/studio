@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
@@ -71,8 +71,10 @@ const AppFooter = () => (
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Support</h4>
+          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Legal & Support</h4>
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
+            <li><a href="/privacy-policy" className="hover:text-[rgb(var(--foreground))] transition-colors flex items-center"><FileText size={14} className="mr-2" /> Privacy Policy</a></li>
+            <li><a href="/terms-of-service" className="hover:text-[rgb(var(--foreground))] transition-colors flex items-center"><BookOpen size={14} className="mr-2" /> Terms of Service</a></li>
             <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">Help Center</a></li>
             <li><a href="mailto:support@picshine.ai" className="hover:text-[rgb(var(--foreground))] transition-colors">Contact</a></li>
             <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">Status</a></li>
@@ -140,13 +142,13 @@ export default function PicShineAiPage() {
           let title = 'Camera Access Error';
           let description = 'Could not access the camera. Ensure it is not in use and permissions are granted in browser/system settings.';
 
-          if (error.name === 'NotAllowedError') {
+          if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
             title = 'Camera Permission Denied';
             description = 'You denied camera access. Please enable camera permissions in your browser or system settings to use this feature.';
           } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
             title = 'No Camera Found';
             description = 'No camera was found on your device. Ensure a camera is connected and enabled.';
-          } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+          } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError' || error.name === 'AbortError') {
             title = 'Camera In Use or Unreadable';
             description = 'The camera might be in use by another application, or there was a hardware/OS error preventing access. Try closing other apps or restarting your browser/device.';
           } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
