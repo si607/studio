@@ -126,20 +126,46 @@ export default function PicShineAiPage() {
     if (showCameraView && typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.mediaDevices) {
       const getCameraPermission = async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+          // Use a more generic constraint for broader compatibility
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCameraPermission(true);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
           }
-        } catch (error) {
-          console.error('Error accessing camera:', error);
+        } catch (error: any) {
+          console.error('Error accessing camera:', error.name, error.message, error);
           setHasCameraPermission(false);
           setShowCameraView(false);
+
+          let title = 'Camera Access Error';
+          let description = 'Could not access the camera. Ensure it is not in use and permissions are granted in browser/system settings.';
+
+          if (error.name === 'NotAllowedError') {
+            title = 'Camera Permission Denied';
+            description = 'You denied camera access. Please enable camera permissions in your browser or system settings to use this feature.';
+          } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            title = 'No Camera Found';
+            description = 'No camera was found on your device. Ensure a camera is connected and enabled.';
+          } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            title = 'Camera In Use or Unreadable';
+            description = 'The camera might be in use by another application, or there was a hardware/OS error preventing access. Try closing other apps or restarting your browser/device.';
+          } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+            title = 'Camera Constraints Not Met';
+            description = `The camera doesn't support the requested settings. Try a different camera if available. (Error: ${error.message})`;
+          } else if (error.name === 'TypeError') {
+            title = 'Camera Configuration Error';
+            description = `There's an issue with the camera request configuration. (Error: ${error.message})`;
+          } else if (error.message && error.message.toLowerCase().includes('secure context')) {
+            title = 'Secure Connection Required';
+            description = 'Camera access requires a secure connection (HTTPS). Please ensure you are accessing this page over HTTPS.';
+          }
+          
           toast({
             variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: 'Please enable camera permissions in your browser settings to use this app.',
+            title: title,
+            description: description,
             icon: <AlertCircle className="h-5 w-5" />,
+            duration: 10000,
           });
         }
       };
@@ -410,7 +436,10 @@ export default function PicShineAiPage() {
         const lowerCaseErrorMessage = error.message.toLowerCase();
         const originalMsg = error.message; 
 
-        if (
+        if (originalMsg.includes("not available in your country") || originalMsg.includes("image generation is not available in your country")) {
+            errorTitle = `AI Feature Unavailable`;
+            errorMessage = `${operationName} failed: This AI feature is not available in your current region/country. Please check Google Cloud service availability.`;
+        } else if (
           originalMsg.startsWith('CRITICAL:') || 
           lowerCaseErrorMessage.includes('an error occurred in the server components render') ||
           (lowerCaseErrorMessage.includes("google ai") && (lowerCaseErrorMessage.includes("failed") || lowerCaseErrorMessage.includes("error"))) ||
@@ -642,7 +671,7 @@ export default function PicShineAiPage() {
                           </AlertDescription>
                         </Alert>
                       )}
-                       {hasCameraPermission === null && (
+                       {hasCameraPermission === null && !isLoading && ( // Only show requesting if not already loading
                         <Alert variant="default" className="mt-2 border-yellow-400/50 text-yellow-400">
                            <AlertTriangle className="h-4 w-4" />
                           <AlertTitle>Requesting Camera</AlertTitle>
@@ -861,3 +890,4 @@ export default function PicShineAiPage() {
   );
 }
     
+
