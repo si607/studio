@@ -113,11 +113,14 @@ export default function PicShineAiPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsShareApiAvailable(!!navigator.share);
+ useEffect(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) {
+      setIsShareApiAvailable(true);
+    } else {
+      setIsShareApiAvailable(false);
     }
   }, []);
+
 
   useEffect(() => {
     if (showCameraView && typeof navigator !== 'undefined' && navigator.mediaDevices) {
