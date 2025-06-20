@@ -45,7 +45,7 @@ const removeScratchesFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Thoroughly restore the provided image by meticulously identifying and eliminating all noticeable scratches, creases, tears, spots, and other physical damages. The restoration should be comprehensive, resulting in a pristine image. Prioritize preserving original details and textures, but ensure significant removal of imperfections for a dramatically cleaner appearance. Avoid an overly smooth or artificial digital look. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
+          {text: "Thoroughly restore the provided image by meticulously identifying and eliminating all noticeable scratches, creases, tears, spots, and other physical damages. The restoration should be comprehensive and photorealistic, resulting in a pristine image. Prioritize preserving original details, textures, and film grain (if applicable), but ensure significant removal of imperfections for a dramatically cleaner appearance. Avoid an overly smooth, 'digital', or artificial look; the goal is to make the image look as if it were originally undamaged. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],

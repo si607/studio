@@ -46,7 +46,7 @@ const colorizeImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Transform the provided image with rich, vivid, and lifelike colors. If it's black and white or grayscale, apply a full, high-fidelity colorization that is both historically accurate (if applicable) and aesthetically stunning. Aim for deep, natural tones and excellent contrast. If already in color, significantly boost its vibrancy, correct any color casts, and enhance overall color harmony for a professional, eye-catching result. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
+          {text: "Transform the provided image with rich, vivid, and photorealistic colors, ensuring historical accuracy if applicable and an aesthetically stunning result. If it's black and white or grayscale, apply a full, high-fidelity colorization. Aim for deep, natural tones, excellent contrast, and subtle gradations that mimic reality. If already in color, significantly boost its vibrancy, correct any color casts, and enhance overall color harmony for a professional, eye-catching result while preserving the original character and details. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],

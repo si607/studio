@@ -47,7 +47,7 @@ const focusEnhanceFaceFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: `Identify the primary human face in this image. Apply a '${style}' enhancement specifically to the facial features. Improve skin texture to look smooth yet natural, enhance eye clarity and sparkle, and refine details like lip definition and hair texture around the face. Ensure the enhancements blend seamlessly with the rest of the image and preserve the original character. Also, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+          {text: `Identify the primary human face in this image. Apply a '${style}' enhancement specifically to the facial features. Improve skin texture to look smooth yet entirely natural, retaining original skin character. Enhance eye clarity for sparkle and depth, and refine details like lip definition and hair texture around the face with photorealistic precision. Ensure the enhancements blend seamlessly with the rest of the image, preserving the original character and avoiding an artificial or 'airbrushed' look. The goal is a subtle but noticeable professional-grade improvement. Also, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
