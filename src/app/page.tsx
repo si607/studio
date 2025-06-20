@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
 import { focusEnhanceFace } from '@/ai/flows/focus-enhance-face';
 import type { FocusEnhanceFaceInput } from '@/ai/flows/focus-enhance-face';
+import { sharpenImage } from '@/ai/flows/sharpen-image';
 
 
 const DAILY_LIMIT = 30;
@@ -128,7 +129,6 @@ export default function PicShineAiPage() {
     if (showCameraView && typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.mediaDevices) {
       const getCameraPermission = async () => {
         try {
-          // Use a more generic constraint for broader compatibility
           const stream = await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCameraPermission(true);
           if (videoRef.current) {
@@ -509,6 +509,10 @@ export default function PicShineAiPage() {
     );
   };
 
+  const handleSharpenImage = () => {
+    performEnhancement(sharpenImage, "Sharpened", "Sharpening image details...");
+  };
+
 
   const handleReset = () => {
     setOriginalImage(null);
@@ -673,7 +677,7 @@ export default function PicShineAiPage() {
                           </AlertDescription>
                         </Alert>
                       )}
-                       {hasCameraPermission === null && !isLoading && ( // Only show requesting if not already loading
+                       {hasCameraPermission === null && !isLoading && ( 
                         <Alert variant="default" className="mt-2 border-yellow-400/50 text-yellow-400">
                            <AlertTriangle className="h-4 w-4" />
                           <AlertTitle>Requesting Camera</AlertTitle>
@@ -702,7 +706,7 @@ export default function PicShineAiPage() {
                   <p className="text-sm text-center text-[rgb(var(--muted-foreground))]">{loadingMessage}</p>
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
@@ -738,6 +742,15 @@ export default function PicShineAiPage() {
                 >
                   {isLoading && loadingMessage.includes("face enhancement") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <User className="mr-2 h-5 w-5" />}
                   Face Enhance
+                </Button>
+                <Button
+                  onClick={handleSharpenImage}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="gradient-button w-full py-3 text-base"
+                  aria-label="Sharpen image details"
+                >
+                  {isLoading && loadingMessage.includes("Sharpening") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Maximize className="mr-2 h-5 w-5" />}
+                  Sharpen Image
                 </Button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -843,7 +856,7 @@ export default function PicShineAiPage() {
                     { icon: <User size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
                     { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
                     { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
-                    { icon: <Layers size={32} className="text-yellow-400"/>, title: "Batch Processing", description: "Process multiple images simultaneously with consistent quality results (Pro)." },
+                    { icon: <Maximize size={32} className="text-blue-400"/>, title: "Sharpen Image", description: "Enhance image clarity and bring out fine details for a crisper look." },
                     { icon: <ShieldCheck size={32} className="text-teal-400"/>, title: "Safe & Secure", description: "Your images are processed securely and deleted after enhancement." },
                 ].map(feature => (
                     <div key={feature.title} className="glass-card p-6 rounded-xl text-center flex flex-col items-center">
@@ -892,4 +905,3 @@ export default function PicShineAiPage() {
   );
 }
     
-

@@ -6,6 +6,7 @@ config();
 import '@/ai/flows/smart-enhance-image.ts'; 
 import '@/ai/flows/colorize-image.ts'; 
 import '@/ai/flows/remove-scratches.ts'; 
-import '@/ai/flows/focus-enhance-face.ts'; // Added new flow for face-focused enhancement
+import '@/ai/flows/focus-enhance-face.ts';
+import '@/ai/flows/sharpen-image.ts'; // Added new flow for sharpening
 
     
