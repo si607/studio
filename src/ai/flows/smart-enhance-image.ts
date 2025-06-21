@@ -87,17 +87,23 @@ const smartEnhanceImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: imageToProcessDataUri}},
-          {text: `You are a master digital photo restoration and enhancement specialist. Your task is to perform a comprehensive, all-in-one 'smart enhancement' on this image. Your goal is a dramatically improved, high-definition, and utterly photorealistic result.
+          {text: `You are an expert-level AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece.
 
-Follow these critical steps:
-1.  **Upscaling & Resolution Boost:** Increase the image resolution by at least 4x. Do not simply enlarge pixels; you must intelligently generate new, realistic detail that is consistent with the original photo's content.
-2.  **Denoising & Artifact Removal:** Aggressively eliminate all digital noise, grain, and compression artifacts (like JPEG blocking). The result should be clean and smooth, but you must preserve fine, natural textures (fabric, wood, etc.).
-3.  **Clarity & Sharpening:** Intelligently enhance the image's clarity and micro-contrast to make details pop. This is not a simple sharpen filter; focus on edges and textures without creating halos or a gritty, over-sharpened look.
-4.  **Color & Lighting Correction:** Analyze and correct the overall color balance, contrast, and dynamic range. Make colors vibrant but natural. Brighten shadows and recover highlights where needed to create a perfectly exposed look.
-5.  **Facial Enhancement (If Applicable):** If human faces are present, apply professional, subtle retouching. Enhance eye clarity by sharpening the iris and adding a natural sparkle or catchlight. Subtly improve skin texture by reducing minor blemishes, but it is CRITICAL to preserve natural skin pores and character. Do not make skin look plastic or overly smooth.
-6.  **Final Polish:** The final image must look like it was captured with a professional, high-end DSLR camera and lens. All enhancements must be harmonious and work together seamlessly.
+Execute the following steps with precision:
 
-Finally, after all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+1.  **De-blurring and Detail Reconstruction:** This is your most critical task. Analyze the image for any motion blur, focus blur, or general softness. Intelligently reconstruct the lost details. If a face is blurry, redefine its features—eyes, nose, and mouth—with sharp, natural-looking clarity. For landscapes or objects, bring textures and edges back into sharp focus. The result must not look artificial; it should appear as if the photo was taken perfectly in focus from the start.
+
+2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, generate new, contextually accurate details. The final image should be suitable for high-quality printing.
+
+3.  **Advanced Denoising & Artifact Removal:** Eliminate all digital noise, compression artifacts (like JPEG blocks), and film grain without sacrificing important textures. The image should look clean, not waxy or overly smooth.
+
+4.  **Professional Color & Lighting Correction:** Correct the color balance, contrast, and dynamic range to professional standards. Make colors vibrant but true-to-life. Adjust lighting to create depth and dimension, recovering details from shadows and highlights.
+
+5.  **Subtle Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity, improve skin texture naturally (preserving pores), and define features without making them look fake.
+
+6.  **Final Polish:** The final output must be indistinguishable from a photo taken with a modern, high-end DSLR camera. It must be sharp, clear, and rich in detail.
+
+After all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
