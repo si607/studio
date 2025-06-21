@@ -87,21 +87,21 @@ const smartEnhanceImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: imageToProcessDataUri}},
-          {text: `You are an expert-level AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece.
+          {text: `You are an expert AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece while **strictly preserving the original subject's identity and facial structure.**
 
 Execute the following steps with precision:
 
-1.  **De-blurring and Detail Reconstruction:** This is your most critical task. Analyze the image for any motion blur, focus blur, or general softness. Intelligently reconstruct the lost details. If a face is blurry, redefine its features—eyes, nose, and mouth—with sharp, natural-looking clarity. For landscapes or objects, bring textures and edges back into sharp focus. The result must not look artificial; it should appear as if the photo was taken perfectly in focus from the start.
+1.  **Strict De-blurring and Detail Restoration (No Alterations):** This is your most critical task. Analyze the image for any motion blur, focus blur, or general softness. Your goal is to **clarify existing details, NOT reconstruct or change them**. If a face is blurry, enhance the sharpness of its existing features—eyes, nose, and mouth—without altering their shape, size, or position. The original identity of the person must be perfectly maintained.
 
-2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, generate new, contextually accurate details. The final image should be suitable for high-quality printing.
+2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, add fine detail that is consistent with the original image's textures.
 
 3.  **Advanced Denoising & Artifact Removal:** Eliminate all digital noise, compression artifacts (like JPEG blocks), and film grain without sacrificing important textures. The image should look clean, not waxy or overly smooth.
 
-4.  **Professional Color & Lighting Correction:** Correct the color balance, contrast, and dynamic range to professional standards. Make colors vibrant but true-to-life. Adjust lighting to create depth and dimension, recovering details from shadows and highlights.
+4.  **Professional Color & Lighting Correction:** Subtly correct the color balance, contrast, and dynamic range to professional standards. Make colors vibrant but true-to-life. Adjust lighting to create depth and dimension, recovering details from shadows and highlights.
 
-5.  **Subtle Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity, improve skin texture naturally (preserving pores), and define features without making them look fake.
+5.  **Natural Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity and **improve skin texture by cleaning imperfections, but you MUST preserve the natural skin texture and pores**. Do not make features look fake or change their fundamental structure.
 
-6.  **Final Polish:** The final output must be indistinguishable from a photo taken with a modern, high-end DSLR camera. It must be sharp, clear, and rich in detail.
+6.  **Final Polish:** The final output must look like a clean, high-resolution version of the original photograph, as if it were taken with a better camera. It must be sharp and clear.
 
 After all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
