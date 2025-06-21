@@ -602,14 +602,22 @@ export default function PicShineAiPage() {
     })
   };
 
-  const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint }: { src: string | null, alt: string, placeholderText: string, 'data-ai-hint'?: string }) => (
-    <div className="aspect-video bg-[rgba(var(--card-bg-rgb),0.3)] rounded-lg flex items-center justify-center overflow-hidden border border-[rgba(var(--card-border-rgb),0.15)] shadow-lg transition-all duration-300 hover:shadow-xl p-1">
+  const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint, isLoading = false, loadingText = "Enhancing..." }: { src: string | null; alt: string; placeholderText: string; 'data-ai-hint'?: string, isLoading?: boolean, loadingText?: string }) => (
+    <div className="relative aspect-square bg-[rgba(var(--card-bg-rgb),0.3)] rounded-lg flex items-center justify-center overflow-hidden border border-[rgba(var(--card-border-rgb),0.15)] shadow-lg transition-all duration-300 hover:shadow-xl p-1">
       {src ? (
         <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" data-ai-hint={aiHint} />
       ) : (
-        <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
-          <ImageIcon size={48} className="mb-2 opacity-50" />
-          <p>{placeholderText}</p>
+        !isLoading && (
+          <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
+            <ImageIcon size={48} className="mb-2 opacity-50" />
+            <p>{placeholderText}</p>
+          </div>
+        )
+      )}
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white z-10">
+            <Loader2 className="h-10 w-10 animate-spin text-[rgb(var(--primary-start-rgb))]" />
+            <p className="mt-4 text-center text-sm font-medium px-4">{loadingText}</p>
         </div>
       )}
     </div>
@@ -701,13 +709,6 @@ export default function PicShineAiPage() {
                 </div>
               )}
 
-
-              {isLoading && (
-                <div className="flex flex-col items-center justify-center space-y-3 p-4">
-                  <Loader2 className="h-12 w-12 animate-spin text-[rgb(var(--primary-start-rgb))]" />
-                  <p className="text-sm text-center text-[rgb(var(--muted-foreground))]">{loadingMessage}</p>
-                </div>
-              )}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
@@ -846,7 +847,7 @@ export default function PicShineAiPage() {
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
-              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="restored photo" />
+              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="restored photo" isLoading={isLoading} loadingText={loadingMessage} />
             </div>
           </div>
 
