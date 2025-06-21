@@ -809,6 +809,7 @@ export default function PicShineAiPage() {
                       <Layers size={16} className="mr-3 text-purple-400 flex-shrink-0" />
                       <span>Priority Processing</span>
                     </li>
+
                   </ul>
                 </CardContent>
               </Card>
@@ -860,6 +861,16 @@ export default function PicShineAiPage() {
               </div>
             </div>
           )}
+        </section>
+
+        <section className="my-12">
+          <div className="container mx-auto max-w-4xl">
+            <div className="text-center text-sm text-[rgb(var(--muted-foreground))] mb-2">Advertisement</div>
+            <div className="mx-auto flex h-[100px] w-full max-w-[728px] items-center justify-center rounded-lg border border-dashed border-[rgba(var(--card-border-rgb),0.2)] bg-[rgba(var(--card-bg-rgb),0.2)] text-[rgb(var(--muted-foreground))]">
+              {/* Ad content will be loaded here by Google AdSense */}
+              <span>Ad Unit (e.g., 728x90)</span>
+            </div>
+          </div>
         </section>
 
         <section id="features" className="my-16 md:my-24">
@@ -920,4 +931,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-    
