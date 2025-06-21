@@ -20,16 +20,31 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2900494836662252"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
       </head>
       <body className="font-body antialiased">
         {children}
         <Toaster />
+        
+        {/* New Ad Scripts */}
+        <Script id="ad-config-script" strategy="afterInteractive">
+          {`
+            atOptions = {
+              'key' : '043edf1829a1a2d00841ff62bf429f10',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          `}
+        </Script>
+        <Script
+          strategy="afterInteractive"
+          src="//www.highperformanceformat.com/043edf1829a1a2d00841ff62bf429f10/invoke.js"
+        />
+        <Script
+          strategy="afterInteractive"
+          src="//pl26935680.profitableratecpm.com/2e/32/93/2e3293b3df54f78268437bf3626a0e36.js"
+        />
       </body>
     </html>
   );

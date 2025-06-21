@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper } from 'lucide-react';
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
 import { removeScratches } from '@/ai/flows/remove-scratches';
 import { focusEnhanceFace } from '@/ai/flows/focus-enhance-face';
 import type { FocusEnhanceFaceInput } from '@/ai/flows/focus-enhance-face';
 import { sharpenImage } from '@/ai/flows/sharpen-image';
+import { removeBackground } from '@/ai/flows/remove-background';
 
 
 const DAILY_LIMIT = 30;
@@ -68,6 +69,7 @@ const AppFooter = () => (
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
             <li><a href="#features" className="hover:text-[rgb(var(--foreground))] transition-colors">Features</a></li>
             <li><a href="#pricing" className="hover:text-[rgb(var(--foreground))] transition-colors">Pricing</a></li>
+            <li><a href="#blog" className="hover:text-[rgb(var(--foreground))] transition-colors">Blog</a></li>
             <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">API</a></li>
           </ul>
         </div>
@@ -513,6 +515,9 @@ export default function PicShineAiPage() {
     performEnhancement(sharpenImage, "Sharpened", "Sharpening image details...");
   };
 
+  const handleRemoveBackground = () => {
+    performEnhancement(removeBackground, "Background Removed", "Removing background from your image...");
+  };
 
   const handleReset = () => {
     setOriginalImage(null);
@@ -703,7 +708,7 @@ export default function PicShineAiPage() {
                   <p className="text-sm text-center text-[rgb(var(--muted-foreground))]">{loadingMessage}</p>
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
@@ -748,6 +753,15 @@ export default function PicShineAiPage() {
                 >
                   {isLoading && loadingMessage.includes("Sharpening") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Maximize className="mr-2 h-5 w-5" />}
                   Sharpen Image
+                </Button>
+                <Button
+                  onClick={handleRemoveBackground}
+                  disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
+                  className="gradient-button w-full py-3 text-base"
+                  aria-label="Remove background from image"
+                >
+                  {isLoading && loadingMessage.includes("Removing background") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
+                  Remove BG
                 </Button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -863,16 +877,6 @@ export default function PicShineAiPage() {
           )}
         </section>
 
-        <section className="my-12">
-          <div className="container mx-auto max-w-4xl">
-            <div className="text-center text-sm text-[rgb(var(--muted-foreground))] mb-2">Advertisement</div>
-            <div className="mx-auto flex h-[100px] w-full max-w-[728px] items-center justify-center rounded-lg border border-dashed border-[rgba(var(--card-border-rgb),0.2)] bg-[rgba(var(--card-bg-rgb),0.2)] text-[rgb(var(--muted-foreground))]">
-              {/* Ad content will be loaded here by Google AdSense */}
-              <span>Ad Unit (e.g., 728x90)</span>
-            </div>
-          </div>
-        </section>
-
         <section id="features" className="my-16 md:my-24">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
                 Powerful AI Features
@@ -884,7 +888,7 @@ export default function PicShineAiPage() {
                     { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
                     { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
                     { icon: <Maximize size={32} className="text-blue-400"/>, title: "Sharpen Image", description: "Enhance image clarity and bring out fine details for a crisper look." },
-                    { icon: <ShieldCheck size={32} className="text-teal-400"/>, title: "Safe & Secure", description: "Your images are processed securely and deleted after enhancement." },
+                    { icon: <Scissors size={32} className="text-red-400"/>, title: "Background Removal", description: "Automatically remove the background from your photos with a single click." },
                 ].map(feature => (
                     <div key={feature.title} className="glass-card p-6 rounded-xl text-center flex flex-col items-center">
                         <div className="p-3 rounded-full bg-[rgba(var(--primary-start-rgb),0.1)] mb-4 inline-block">
@@ -892,6 +896,43 @@ export default function PicShineAiPage() {
                         </div>
                         <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
                         <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
+                    </div>
+                ))}
+            </div>
+        </section>
+
+        <section id="blog" className="my-16 md:my-24">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
+                From the Blog
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[
+                    { 
+                        image: 'https://placehold.co/600x400.png',
+                        'data-ai-hint': 'photography tips',
+                        title: '5 Tips for Restoring Old Family Photos', 
+                        excerpt: 'Learn how to breathe new life into your cherished memories with these simple yet effective AI-powered restoration techniques.' 
+                    },
+                    { 
+                        image: 'https://placehold.co/600x400.png',
+                        'data-ai-hint': 'colorization history',
+                        title: 'The Magic of AI Colorization: From B&W to Vivid', 
+                        excerpt: 'Explore the technology behind turning black and white photos into vibrant color images and how PicShine AI makes it easy.' 
+                    },
+                    { 
+                        image: 'https://placehold.co/600x400.png',
+                        'data-ai-hint': 'portrait photography',
+                        title: 'Get Professional-Looking Portraits with AI', 
+                        excerpt: 'You don’t need an expensive camera. Discover how to enhance facial features and create stunning portraits with just a few clicks.' 
+                    },
+                ].map(post => (
+                    <div key={post.title} className="glass-card overflow-hidden rounded-xl flex flex-col">
+                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover" data-ai-hint={post['data-ai-hint']} />
+                        <div className="p-6 flex flex-col flex-grow">
+                            <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{post.title}</h3>
+                            <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{post.excerpt}</p>
+                            <a href="#" className="text-sm font-semibold text-[rgb(var(--primary-start-rgb))] hover:underline mt-4 self-start">Read More &rarr;</a>
+                        </div>
                     </div>
                 ))}
             </div>
