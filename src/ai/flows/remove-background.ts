@@ -45,7 +45,7 @@ const removeBackgroundFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Identify the primary subject(s) in this image. Meticulously and accurately remove the entire background, making it fully transparent. The final output must be an image of only the subject(s) on a transparent background, suitable for use as a PNG with an alpha channel. Preserve all details of the subject's edges. Do not add any watermark."},
+          {text: "Your task is to precisely remove the background from this image. Identify the primary subject(s) with extreme accuracy. Create a clean, sharp cutout with a fully transparent background. Pay special attention to complex edges like hair, fur, or fine details, ensuring no background remnants are left and the subject's edges are not cropped. The final output must be a high-quality PNG with a perfect alpha channel. Do not add any watermark or alter the subject itself."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],

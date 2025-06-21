@@ -45,7 +45,7 @@ const sharpenImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Analyze the provided image and apply a sophisticated sharpening effect to enhance fine details, textures, and edges for a photorealistic and professional-grade result. The goal is to make the image appear crisper and more defined without introducing excessive noise, halos, or other artifacts. Focus on improving overall clarity and definition while maintaining a natural look and preserving the original character of the image. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
+          {text: "Your task is to apply intelligent, professional-grade sharpening to this image. Analyze the image and selectively enhance the sharpness of key subjects and textures, such as edges, eyes, and fabric details. Avoid sharpening noise, film grain, or out-of-focus backgrounds. The goal is to create a crisper, more defined image that looks naturally sharp and clear, without introducing any digital artifacts, halos, or an over-sharpened, gritty look. The enhancement should be noticeable but photorealistic. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
