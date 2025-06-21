@@ -69,7 +69,6 @@ const AppFooter = () => (
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
             <li><a href="#features" className="hover:text-[rgb(var(--foreground))] transition-colors">Features</a></li>
             <li><a href="#pricing" className="hover:text-[rgb(var(--foreground))] transition-colors">Pricing</a></li>
-            <li><a href="#blog" className="hover:text-[rgb(var(--foreground))] transition-colors">Blog</a></li>
             <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">API</a></li>
           </ul>
         </div>
@@ -897,40 +896,6 @@ export default function PicShineAiPage() {
                         </div>
                         <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
                         <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
-                    </div>
-                ))}
-            </div>
-        </section>
-
-        <section id="blog" className="my-16 md:my-24">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
-                From the Blog
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[
-                    { 
-                        image: 'https://placehold.co/600x400.png',
-                        title: '5 Tips for Restoring Old Family Photos', 
-                        excerpt: 'Learn how to breathe new life into your cherished memories with these simple yet effective AI-powered restoration techniques.' 
-                    },
-                    { 
-                        image: 'https://placehold.co/600x400.png',
-                        title: 'The Magic of AI Colorization: From B&W to Vivid', 
-                        excerpt: 'Explore the technology behind turning black and white photos into vibrant color images and how PicShine AI makes it easy.' 
-                    },
-                    { 
-                        image: 'https://placehold.co/600x400.png',
-                        title: 'Get Professional-Looking Portraits with AI', 
-                        excerpt: 'You don’t need an expensive camera. Discover how to enhance facial features and create stunning portraits with just a few clicks.' 
-                    },
-                ].map(post => (
-                    <div key={post.title} className="glass-card overflow-hidden rounded-xl flex flex-col">
-                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
-                        <div className="p-6 flex flex-col flex-grow">
-                            <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{post.title}</h3>
-                            <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{post.excerpt}</p>
-                            <a href="#" className="text-sm font-semibold text-[rgb(var(--primary-start-rgb))] hover:underline mt-4 self-start">Read More &rarr;</a>
-                        </div>
                     </div>
                 ))}
             </div>
