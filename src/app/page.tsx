@@ -708,11 +708,11 @@ export default function PicShineAiPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Button
                   onClick={handleSmartEnhance}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Smart enhance and upscale uploaded image"
                 >
                   {isLoading && loadingMessage.includes("smart enhancements") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Sparkles className="mr-2 h-5 w-5" />}
@@ -721,7 +721,7 @@ export default function PicShineAiPage() {
                 <Button
                   onClick={handleColorize}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Colorize uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Colorizing") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Palette className="mr-2 h-5 w-5" />}
@@ -730,7 +730,7 @@ export default function PicShineAiPage() {
                  <Button
                   onClick={handleRemoveScratches}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Remove scratches from uploaded image"
                 >
                   {isLoading && loadingMessage.includes("Removing scratches") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Brush className="mr-2 h-5 w-5" />}
@@ -739,7 +739,7 @@ export default function PicShineAiPage() {
                  <Button
                   onClick={handleFocusEnhanceFace}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Focus enhance face in uploaded image"
                 >
                   {isLoading && loadingMessage.includes("face enhancement") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <User className="mr-2 h-5 w-5" />}
@@ -748,7 +748,7 @@ export default function PicShineAiPage() {
                 <Button
                   onClick={handleSharpenImage}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Sharpen image details"
                 >
                   {isLoading && loadingMessage.includes("Sharpening") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Maximize className="mr-2 h-5 w-5" />}
@@ -757,7 +757,7 @@ export default function PicShineAiPage() {
                 <Button
                   onClick={handleRemoveBackground}
                   disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT}
-                  className="gradient-button w-full py-3 text-base"
+                  className="gradient-button w-full py-2 text-sm sm:text-base whitespace-normal h-20 flex items-center justify-center"
                   aria-label="Remove background from image"
                 >
                   {isLoading && loadingMessage.includes("Removing background") ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Scissors className="mr-2 h-5 w-5" />}
