@@ -87,23 +87,23 @@ const smartEnhanceImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: imageToProcessDataUri}},
-          {text: `You are an expert AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece while **strictly preserving the original subject's identity and facial structure.**
+          {text: `You are an expert AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece while **strictly preserving the original subject's identity, facial structure, and background.**
 
 Execute the following steps with precision:
 
-1.  **Strict De-blurring and Detail Restoration (No Alterations):** This is your most critical task. Analyze the image for any motion blur, focus blur, or general softness. Your goal is to **clarify existing details, NOT reconstruct or change them**. If a face is blurry, enhance the sharpness of its existing features—eyes, nose, and mouth—without altering their shape, size, or position. The original identity of the person must be perfectly maintained.
+1.  **Strict De-blurring and Detail Restoration (No Alterations):** Your most critical task. Analyze the image for any motion blur, focus blur, or general softness. Your goal is to **clarify existing details, NOT reconstruct or change them**. If a face is blurry, enhance the sharpness of its existing features—eyes, nose, and mouth—without altering their shape, size, or position. The original identity of the person must be perfectly maintained.
 
-2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, add fine detail that is consistent with the original image's textures.
+2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, add fine, realistic detail that is consistent with the original image's textures. The final result must look sharp and clear, as if it were shot on a professional camera.
 
 3.  **Advanced Denoising & Artifact Removal:** Eliminate all digital noise, compression artifacts (like JPEG blocks), and film grain without sacrificing important textures. The image should look clean, not waxy or overly smooth.
 
-4.  **Professional Color & Lighting Correction:** Subtly correct the color balance, contrast, and dynamic range to professional standards. Make colors vibrant but true-to-life. Adjust lighting to create depth and dimension, recovering details from shadows and highlights.
+4.  **Preserve Original Background:** It is crucial that you DO NOT change, replace, or remove the original background of the image. The background should be enhanced along with the subject, maintaining its original composition, colors, and blur level.
 
-5.  **Natural Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity and **improve skin texture by cleaning imperfections, but you MUST preserve the natural skin texture and pores**. Do not make features look fake or change their fundamental structure.
+5.  **Professional Color & Lighting Correction:** Subtly correct the color balance, contrast, and dynamic range to professional standards. Make colors vibrant but true-to-life. Adjust lighting to create depth and dimension, recovering details from shadows and highlights.
 
-6.  **Final Polish:** The final output must look like a clean, high-resolution version of the original photograph, as if it were taken with a better camera. It must be sharp and clear.
+6.  **Natural Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity and **improve skin texture by cleaning imperfections, but you MUST preserve the natural skin texture and pores**. Do not make features look fake or change their fundamental structure.
 
-After all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+7.  **Watermark:** After all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
@@ -138,7 +138,7 @@ After all enhancements are complete, discreetly incorporate a very small, semi-t
             (lowerMsg.includes("google ai") && (lowerMsg.includes("failed") || lowerMsg.includes("error"))) ||
             lowerMsg.includes('internal server error') ||
             lowerMsg.includes('failed to fetch') || 
-            (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMessage.length < 300 && !originalMessage.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')))
+            (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMessage.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')))
         {
              clientErrorMessage = `CRITICAL: Photo enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed') || lowerMsg.includes('api_key_not_valid')) {

@@ -47,7 +47,18 @@ const focusEnhanceFaceFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: `Your task is to perform a professional-grade facial retouching with the style of '${style}'. Identify the primary human face and apply enhancements that are subtle yet effective. Your top priority is to maintain complete realism. Improve skin texture by reducing minor blemishes, but preserve natural pores and character—do not make it look plastic or overly smooth. Enhance eye clarity for a natural sparkle and depth. Refine details in lips and hair with photorealistic precision. Critically, ensure the lighting and shadows on the face are consistent with the rest of the image. The result must look like a professionally shot portrait, not an artificially 'airbrushed' image. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+          {text: `You are a world-class digital portrait retoucher. Your task is to perform a professional-grade facial enhancement with the style of '${style}'.
+
+Your absolute top priority is to maintain complete realism and preserve the person's unique identity.
+
+Follow these instructions precisely:
+1.  **Identify Primary Face:** Accurately locate the main human face in the image.
+2.  **Subtle Skin Retouching:** Improve skin texture by gently reducing minor blemishes, redness, or uneven tones. It is CRITICAL to preserve natural skin pores and character. The result must not look plastic, waxy, or overly smooth.
+3.  **Natural Eye Enhancement:** Enhance eye clarity for a natural sparkle and depth. Do not change the eye color or shape.
+4.  **Preserve Facial Structure:** This is non-negotiable. Do NOT alter the fundamental shape, size, or position of facial features like the eyes, nose, or mouth. The person's identity must be perfectly preserved.
+5.  **Lighting Consistency:** Ensure all enhancements to lighting and shadows on the face are perfectly consistent with the rest of the image.
+6.  **Final Polish:** The result must look like a professionally shot and retouched portrait, not an artificially 'airbrushed' image.
+7.  **Watermark:** Discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
