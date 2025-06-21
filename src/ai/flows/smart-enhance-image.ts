@@ -87,7 +87,17 @@ const smartEnhanceImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: imageToProcessDataUri}},
-          {text: "Your task is an expert-level, all-in-one photo enhancement. Perform a significant upscaling of the image, aiming for at least a 4x resolution increase while creating photorealistic details—do not just enlarge pixels. Aggressively reduce digital noise and compression artifacts without losing fine textures. If human faces are present, apply professional retouching: enhance facial clarity, improve skin texture to be clear but completely natural (preserving pores), and add sparkle to the eyes. The final result must be a dramatically improved, high-definition version that looks like it was shot with a high-end camera. All enhancements must be harmonious and photorealistic. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
+          {text: `You are a master digital photo restoration and enhancement specialist. Your task is to perform a comprehensive, all-in-one 'smart enhancement' on this image. Your goal is a dramatically improved, high-definition, and utterly photorealistic result.
+
+Follow these critical steps:
+1.  **Upscaling & Resolution Boost:** Increase the image resolution by at least 4x. Do not simply enlarge pixels; you must intelligently generate new, realistic detail that is consistent with the original photo's content.
+2.  **Denoising & Artifact Removal:** Aggressively eliminate all digital noise, grain, and compression artifacts (like JPEG blocking). The result should be clean and smooth, but you must preserve fine, natural textures (fabric, wood, etc.).
+3.  **Clarity & Sharpening:** Intelligently enhance the image's clarity and micro-contrast to make details pop. This is not a simple sharpen filter; focus on edges and textures without creating halos or a gritty, over-sharpened look.
+4.  **Color & Lighting Correction:** Analyze and correct the overall color balance, contrast, and dynamic range. Make colors vibrant but natural. Brighten shadows and recover highlights where needed to create a perfectly exposed look.
+5.  **Facial Enhancement (If Applicable):** If human faces are present, apply professional, subtle retouching. Enhance eye clarity by sharpening the iris and adding a natural sparkle or catchlight. Subtly improve skin texture by reducing minor blemishes, but it is CRITICAL to preserve natural skin pores and character. Do not make skin look plastic or overly smooth.
+6.  **Final Polish:** The final image must look like it was captured with a professional, high-end DSLR camera and lens. All enhancements must be harmonious and work together seamlessly.
+
+Finally, after all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
