@@ -43,7 +43,7 @@ const colorizeImageFlow = ai.defineFlow(
   async input => {
     try {
       const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: input.photoDataUri}},
           {text: "Your task is professional, photorealistic colorization. Analyze the context (era, objects, lighting) of this black and white image to apply historically and physically accurate colors. The result must be rich, vibrant, and natural, with realistic skin tones, deep contrast, and subtle gradients. Avoid flat colors or an artificial 'painted' look. The final image should look like a high-quality photograph originally shot in color. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},

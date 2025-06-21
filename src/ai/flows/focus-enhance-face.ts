@@ -44,7 +44,7 @@ const focusEnhanceFaceFlow = ai.defineFlow(
     try {
       const style = input.enhancementStyle || 'natural clarity';
       const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: input.photoDataUri}},
           {text: `You are a specialized AI digital photo restoration expert. Your primary, non-negotiable task is to enhance the clarity of the main human face in this image while **STRICTLY PRESERVING the person's original identity and facial structure.** Any change to the shape, size, or position of facial features is a failure.

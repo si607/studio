@@ -84,7 +84,7 @@ const smartEnhanceImageFlow = ai.defineFlow(
 
     try {
       const {media} = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: imageToProcessDataUri}},
           {text: `You are an expert AI photo restoration and enhancement engine. Your primary task is to take any input image, especially those that are blurry, low-resolution, or old, and transform it into a crystal-clear, high-definition, and photorealistic masterpiece while **strictly preserving the original subject's identity, facial structure, and background.**
@@ -95,7 +95,7 @@ Execute the following steps with precision:
 
 2.  **High-Definition Upscaling:** Increase the image resolution by at least 4x. While upscaling, add fine, realistic detail that is consistent with the original image's textures. The final result must look sharp and clear, as if it were shot on a professional camera.
 
-3.  **Advanced Denoising & Artifact Removal:** Eliminate all digital noise, compression artifacts (like JPEG blocks), and film grain without sacrificing important textures. The image should look clean, not waxy or overly smooth.
+3.  **Advanced Denoising & Artifact Removal:** Eliminate all digital noise, compression artifacts (like JPEG blocks), and film grain without sacrificing important textures. The image should look clean, not waxy, or overly smooth.
 
 4.  **Preserve Original Background:** It is crucial that you DO NOT change, replace, or remove the original background of the image. The background should be enhanced along with the subject, maintaining its original composition, colors, and blur level.
 
