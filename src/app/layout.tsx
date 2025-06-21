@@ -6,7 +6,7 @@ import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'PicShine AI - Advanced Photo Enhancement',
-  description: 'Transform your photos with AI-powered enhancement. Super-resolution, face enhancement, colorization and more.',
+  description: 'Transform your photos with PicShine AI, the ultimate AI photo enhancer. Instantly upscale, colorize, remove scratches, and restore your images to stunning quality.',
 };
 
 export default function RootLayout({
