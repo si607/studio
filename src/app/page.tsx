@@ -3,7 +3,7 @@
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -628,9 +628,6 @@ export default function PicShineAiPage() {
           </p>
         </section>
 
-        <div id="container-242b734757198216a6ef5b94eae86475" className="ad-placeholder-container my-8">
-        </div>
-
         <section className="glass-card p-6 md:p-8 rounded-2xl mb-12">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div className="lg:col-span-3 space-y-6">
@@ -788,23 +785,42 @@ export default function PicShineAiPage() {
             </div>
 
             <div className="lg:col-span-2 space-y-4">
-               <div className="ad-placeholder-container">
-                  <div className="ad-label">Advertisement Area 1</div>
-                   <p className="text-sm text-[rgb(var(--muted-foreground))]">AdMob Unit ID: ca-app-pub-2900494836662252/1153507362 (Visual Reference)</p>
-                   <p className="text-xs text-[rgb(var(--muted-foreground))] mt-1">(e.g., AdSense or other display ad)</p>
-              </div>
-                <Button
-                  onClick={handleUpgradePro}
-                  className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                  style={{background: 'linear-gradient(45deg, #FDB813, #F5821F, #E1306C)', color: 'white'}}
-                  aria-label="Upgrade to Pro"
-                >
-                  <Crown className="mr-2 h-5 w-5" /> Upgrade to Pro
-                </Button>
-                 <div className="ad-placeholder-container">
-                    <div className="ad-label">Advertisement Area 2</div>
-                    <p className="text-sm text-[rgb(var(--muted-foreground))]">General Ad Placeholder</p>
-                </div>
+              <Card className="glass-card p-4 !rounded-xl">
+                <CardHeader className="p-2 pt-0 md:p-2 md:pt-0">
+                  <CardTitle className="text-lg flex items-center">
+                    <Crown size={20} className="mr-2 text-yellow-400" /> Go Pro
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 pb-0 md:p-2 md:pb-0 text-sm">
+                  <ul className="space-y-3 text-[rgb(var(--foreground))]">
+                    <li className="flex items-center">
+                      <CheckCircle2 size={16} className="mr-3 text-green-400 flex-shrink-0" />
+                      <span>Unlimited Photo Enhancements</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Zap size={16} className="mr-3 text-blue-400 flex-shrink-0" />
+                      <span>Highest Quality & Resolution</span>
+                    </li>
+                    <li className="flex items-center">
+                      <ShieldCheck size={16} className="mr-3 text-teal-400 flex-shrink-0" />
+                      <span>No Watermarks</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Layers size={16} className="mr-3 text-purple-400 flex-shrink-0" />
+                      <span>Priority Processing</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Button
+                onClick={handleUpgradePro}
+                className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                style={{background: 'linear-gradient(45deg, #FDB813, #F5821F, #E1306C)', color: 'white'}}
+                aria-label="Upgrade to Pro"
+              >
+                <Crown className="mr-2 h-5 w-5" /> Upgrade to Pro
+              </Button>
             </div>
           </div>
 

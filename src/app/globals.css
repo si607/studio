@@ -129,18 +129,6 @@ body {
   50% { background-position: 100% 50%; }
 }
 
-/* Style for ad placeholders to make them visually distinct */
-.ad-placeholder-container {
-  background: rgba(var(--card-bg-rgb), var(--card-bg-alpha));
-  border: 1px solid var(--border);
-  @apply rounded-lg p-4 my-4 text-center backdrop-blur-md;
-}
-
-.ad-label {
-  @apply text-xs uppercase tracking-wider mb-2;
-  color: rgb(var(--muted-foreground));
-}
-
 /* Additional style for fixed header to avoid content overlap */
 body {
   padding-top: 80px; /* Adjust based on header height */
