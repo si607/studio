@@ -128,13 +128,3 @@ body {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
-
-/* Additional style for fixed header to avoid content overlap */
-body {
-  padding-top: 80px; /* Adjust based on header height */
-}
-
-header.fixed-header {
-  background: rgba(var(--card-bg-rgb), 0.85); /* Slightly more opaque for readability */
-  @apply backdrop-blur-2xl;
-}
