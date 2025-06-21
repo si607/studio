@@ -3,13 +3,12 @@
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper } from 'lucide-react';
-import { Sidebar, SidebarProvider, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
@@ -603,204 +602,166 @@ export default function PicShineAiPage() {
     </div>
   );
 
-
   return (
     <div className="min-h-screen bg-background text-[rgb(var(--foreground))]">
       <canvas ref={canvasRef} className="hidden"></canvas>
-      <SidebarProvider>
-        <Sidebar>
-            <SidebarHeader className="p-4 border-b border-[rgba(var(--card-border-rgb),0.1)]">
-                <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-primary-fallback rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4D3DF4 0%, #AB3FFB 50%, #1E90FF 100%)'}}>
-                        <Sparkles size={24} className="text-white" />
+      <main className="container mx-auto px-4 py-8 max-w-7xl flex-grow">
+          <section id="home" className="text-center my-12 md:my-16">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
+              <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
+                Enhance Your Photos with AI
+              </span>
+            </h2>
+            <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
+              Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
+            </p>
+          </section>
+
+          <Card className="glass-card w-full max-w-5xl mx-auto mb-12">
+            <CardHeader>
+                <CardTitle className="flex items-center text-2xl">
+                <UploadCloud className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" />
+                Upload & Enhance Your Photo
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center p-8">
+                <div className="flex flex-col gap-4">
+                  {!showCameraView ? (
+                    <label
+                      htmlFor="imageUpload"
+                      className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
+                                  ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
+                                  bg-[rgba(var(--card-bg-rgb),0.2)]`}
+                      aria-busy={isLoading}
+                      aria-disabled={isLoading}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                        <UploadCloud className={`w-10 h-10 mb-3 ${isDragging ? 'text-[rgb(var(--primary-start-rgb))]' : 'text-[rgb(var(--muted-foreground))]'}`} />
+                        <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
+                          <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag
+                        </p>
+                        <p className="text-xs text-[rgb(var(--muted-foreground))] px-1">PNG, JPG, GIF, WEBP (Max 5MB)</p>
+                         {fileName && !isLoading && !originalImage && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2 bg-[rgba(var(--primary-start-rgb),0.1)] px-2 py-1 rounded-md">{fileName}</p>}
+                        {isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2">Processing: {fileName}</p>}
+                      </div>
+                      <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
+                    </label>
+                  ) : (
+                    <div className="space-y-4">
+                        <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
+                        {hasCameraPermission === false && (
+                          <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Camera Access Denied</AlertTitle>
+                          </Alert>
+                        )}
+                        <Button onClick={handleCapture} disabled={isLoading || (typeof window !== 'undefined' && !hasCameraPermission)} className="gradient-button w-full">
+                           <Camera className="mr-2 h-5 w-5" /> Capture Image
+                        </Button>
                     </div>
-                    <div>
-                        <h1 className="text-xl font-bold text-[rgb(var(--foreground))]">PicShine AI</h1>
-                        <p className="text-xs text-[rgb(var(--muted-foreground))]">Photo Enhancement</p>
-                    </div>
+                  )}
+                  <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setShowCameraView(prev => !prev)} disabled={isLoading}>
+                    <Camera size={14} className="mr-2" /> {showCameraView ? 'Cancel Camera' : 'Use Camera'}
+                  </Button>
                 </div>
-            </SidebarHeader>
-            <SidebarContent className="p-4 space-y-6">
-              {!showCameraView ? (
-                <label
-                  htmlFor="imageUpload"
-                  className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors duration-200
-                              ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] ring-2 ring-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
-                              bg-[rgba(var(--card-bg-rgb),0.2)]`}
-                  aria-busy={isLoading}
-                  aria-disabled={isLoading}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                    <UploadCloud className={`w-10 h-10 mb-3 ${isDragging ? 'text-[rgb(var(--primary-start-rgb))]' : 'text-[rgb(var(--muted-foreground))]'}`} />
-                    <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
-                      <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag
-                    </p>
-                    <Button type="button" variant="outline" size="sm" className="mt-2 text-xs" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowCameraView(true); }} disabled={isLoading}>
-                      <Camera size={14} className="mr-2" /> Use Camera
-                    </Button>
-                    <p className="text-xs text-[rgb(var(--muted-foreground))] mt-2 px-1">PNG, JPG, GIF, WEBP (Max 5MB)</p>
-                    {fileName && !isLoading && !originalImage && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2 bg-[rgba(var(--primary-start-rgb),0.1)] px-2 py-1 rounded-md">{fileName}</p>}
-                    {isLoading && <p className="text-xs text-[rgb(var(--primary-start-rgb))] mt-2">Processing: {fileName}</p>}
+                
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button onClick={handleSmartEnhance} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Smart enhance and upscale"> <Sparkles className="h-5 w-5 mb-1" /> <span className="flex-wrap">Smart Enhance</span> </Button>
+                    <Button onClick={handleColorize} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Colorize image"> <Palette className="h-5 w-5 mb-1" /> <span className="flex-wrap">Auto Colorize</span> </Button>
+                    <Button onClick={handleRemoveScratches} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Remove scratches"> <Brush className="h-5 w-5 mb-1" /> <span className="flex-wrap">Remove Scratches</span> </Button>
+                    <Button onClick={handleFocusEnhanceFace} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Enhance face"> <User className="h-5 w-5 mb-1" /> <span className="flex-wrap">Face Enhance</span> </Button>
+                    <Button onClick={handleSharpenImage} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Sharpen image"> <Maximize className="h-5 w-5 mb-1" /> <span className="flex-wrap">Sharpen Image</span> </Button>
+                    <Button onClick={handleRemoveBackground} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-20 text-sm flex-col" aria-label="Remove background"> <Scissors className="h-5 w-5 mb-1" /> <span className="flex-wrap">Remove BG</span> </Button>
                   </div>
-                  <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} disabled={isLoading} />
-                </label>
-              ) : (
-                <div className="space-y-4">
-                  <Card className="border-[rgba(var(--card-border-rgb),0.2)] bg-[rgba(var(--card-bg-rgb),0.2)]">
-                    <CardHeader className="p-2">
-                      <CardTitle className="text-base">Camera Preview</CardTitle>
-                    </CardHeader>
-                    <div className="p-2">
-                      <video ref={videoRef} className="w-full aspect-video rounded-md bg-black" autoPlay muted playsInline />
-                      {hasCameraPermission === false && (
-                        <Alert variant="destructive" className="mt-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle>Camera Access Denied</AlertTitle>
-                        </Alert>
-                      )}
+                </div>
+            </CardContent>
+            <CardFooter className="flex-col md:flex-row justify-between items-center gap-4 border-t border-[rgba(var(--card-border-rgb),0.1)] pt-6">
+                <div className="flex gap-2">
+                    <Button onClick={handleDownload} disabled={!enhancedImage || isLoading} variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> Download</Button>
+                    <Button onClick={handleReset} disabled={isLoading || (!originalImage && !enhancedImage && !showCameraView)} variant="outline" size="sm"><RotateCcw className="h-4 w-4 mr-2" /> Reset</Button>
+                    <Button onClick={handleShare} disabled={!enhancedImage || isLoading || !isShareApiAvailable} variant="outline" size="sm"><Share2 className="h-4 w-4 mr-2" /> Share</Button>
+                </div>
+                <div className="flex items-center gap-4">
+                    <p className="text-xs text-center text-[rgb(var(--muted-foreground))]">Daily enhancements: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
+                    <Button
+                        onClick={handleUpgradePro}
+                        className="text-xs py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                        style={{background: 'linear-gradient(45deg, #FDB813, #F5821F, #E1306C)', color: 'white'}}
+                        aria-label="Upgrade to Pro"
+                    >
+                        <Crown className="mr-2 h-4 w-4" /> Go Pro
+                    </Button>
+                </div>
+            </CardFooter>
+          </Card>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-10">
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original Image</h3>
+              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload or capture an image to see it here." />
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
+              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." isLoading={isLoading} loadingText={loadingMessage} />
+            </div>
+          </div>
+
+          {userHistory.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
+              <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] mb-6 flex items-center justify-center">
+                <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" /> Your Recent Enhancements
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {userHistory.map((item) => (
+                  <Card
+                    key={item.id}
+                    className="glass-card overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-200 group !rounded-lg border-transparent hover:border-[rgb(var(--primary-start-rgb))]"
+                    onClick={() => loadFromHistory(item)}
+                    title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
+                  >
+                    <div className="aspect-square bg-[rgba(var(--card-bg-rgb),0.2)] flex items-center justify-center relative p-1">
+                      <img src={item.enhancedImage} alt={`Enhanced ${item.operation}`} className="max-h-full max-w-full object-contain rounded-md" />
+                      <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-2 text-center">
+                        <p className="text-xs font-semibold">{item.operation}</p>
+                        {item.fileName && <p className="text-[10px] truncate w-full">{item.fileName}</p>}
+                      </div>
                     </div>
                   </Card>
-                  <div className="flex gap-2">
-                    <Button onClick={handleCapture} disabled={isLoading || (typeof window !== 'undefined' && !hasCameraPermission)} className="gradient-button w-full">
-                      <Camera className="mr-2 h-5 w-5" /> Capture
-                    </Button>
-                    <Button variant="outline" onClick={() => setShowCameraView(false)} disabled={isLoading} className="w-full">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button onClick={handleSmartEnhance} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Smart enhance and upscale"> <Sparkles className="h-5 w-5 mb-1" /> Smart Enhance </Button>
-                <Button onClick={handleColorize} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Colorize image"> <Palette className="h-5 w-5 mb-1" /> Auto Colorize </Button>
-                <Button onClick={handleRemoveScratches} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Remove scratches"> <Brush className="h-5 w-5 mb-1" /> Remove Scratches </Button>
-                <Button onClick={handleFocusEnhanceFace} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Enhance face"> <User className="h-5 w-5 mb-1" /> Face Enhance </Button>
-                <Button onClick={handleSharpenImage} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Sharpen image"> <Maximize className="h-5 w-5 mb-1" /> Sharpen Image </Button>
-                <Button onClick={handleRemoveBackground} disabled={!originalImage || isLoading || usageCount >= DAILY_LIMIT} className="gradient-button w-full h-16 text-sm flex-col" aria-label="Remove background"> <Scissors className="h-5 w-5 mb-1" /> Remove BG </Button>
+                ))}
               </div>
-                
-              <div className="grid grid-cols-3 gap-2">
-                <Button onClick={handleDownload} disabled={!enhancedImage || isLoading} variant="outline" size="sm" className="flex-col h-14"><Download className="h-5 w-5 mb-1" /> Download</Button>
-                <Button onClick={handleReset} disabled={isLoading || (!originalImage && !enhancedImage && !showCameraView)} variant="outline" size="sm" className="flex-col h-14"><RotateCcw className="h-5 w-5 mb-1" /> Reset</Button>
-                <Button onClick={handleShare} disabled={!enhancedImage || isLoading || !isShareApiAvailable} variant="outline" size="sm" className="flex-col h-14"><Share2 className="h-5 w-5 mb-1" /> Share</Button>
-              </div>
+            </div>
+          )}
 
-            </SidebarContent>
-            <SidebarFooter className="p-4 border-t border-[rgba(var(--card-border-rgb),0.1)] space-y-4">
-                 <Card className="glass-card p-4 !rounded-xl">
-                    <CardHeader className="p-2 pt-0">
-                      <CardTitle className="text-lg flex items-center">
-                        <Crown size={20} className="mr-2 text-yellow-400" /> Go Pro
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-2 pb-0 text-sm">
-                      <ul className="space-y-2 text-[rgb(var(--foreground))] text-xs">
-                        <li className="flex items-center"><CheckCircle2 size={14} className="mr-2 text-green-400 flex-shrink-0" /> Unlimited Enhancements</li>
-                        <li className="flex items-center"><Zap size={14} className="mr-2 text-blue-400 flex-shrink-0" /> Highest Quality</li>
-                        <li className="flex items-center"><ShieldCheck size={14} className="mr-2 text-teal-400 flex-shrink-0" /> No Watermarks</li>
-                        <li className="flex items-center"><Layers size={14} className="mr-2 text-purple-400 flex-shrink-0" /> Priority Processing</li>
-                      </ul>
-                    </CardContent>
-                </Card>
-                <Button
-                    onClick={handleUpgradePro}
-                    className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-                    style={{background: 'linear-gradient(45deg, #FDB813, #F5821F, #E1306C)', color: 'white'}}
-                    aria-label="Upgrade to Pro"
-                >
-                    <Crown className="mr-2 h-5 w-5" /> Upgrade to Pro
-                </Button>
-                <p className="text-xs text-center text-[rgb(var(--muted-foreground))]">Daily enhancements: {Math.max(0, DAILY_LIMIT - usageCount)}/{DAILY_LIMIT}.</p>
-            </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-            <header className="sticky top-0 z-10 w-full bg-background/50 backdrop-blur-lg border-b border-[rgba(var(--card-border-rgb),0.1)]">
-                <div className="container mx-auto px-6 py-4 flex items-center">
-                    <SidebarTrigger />
-                    <span className="ml-4 text-sm text-muted-foreground hidden md:inline">Toggle Sidebar (Ctrl+B)</span>
-                </div>
-            </header>
-            <main className="container mx-auto px-4 py-8 max-w-6xl flex-grow">
-              <section id="home" className="text-center my-12 md:my-16">
-                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
-                  <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
-                    Enhance Your Photos with AI
-                  </span>
-                </h2>
-                <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
-                  Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
-                </p>
-              </section>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-10">
-                <div className="space-y-3">
-                  <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original Image</h3>
-                  <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload or capture an image to see it here." />
-                </div>
-                <div className="space-y-3">
-                  <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
-                  <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." isLoading={isLoading} loadingText={loadingMessage} />
-                </div>
-              </div>
-
-              {userHistory.length > 0 && (
-                <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
-                  <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] mb-6 flex items-center justify-center">
-                    <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" /> Your Recent Enhancements
-                  </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {userHistory.map((item) => (
-                      <Card
-                        key={item.id}
-                        className="glass-card overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-200 group !rounded-lg border-transparent hover:border-[rgb(var(--primary-start-rgb))]"
-                        onClick={() => loadFromHistory(item)}
-                        title={`Click to load: ${item.operation} on ${item.fileName || 'image'}`}
-                      >
-                        <div className="aspect-square bg-[rgba(var(--card-bg-rgb),0.2)] flex items-center justify-center relative p-1">
-                          <img src={item.enhancedImage} alt={`Enhanced ${item.operation}`} className="max-h-full max-w-full object-contain rounded-md" />
-                          <div className="absolute inset-0 bg-[rgba(0,0,0,0.7)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center text-white p-2 text-center">
-                            <p className="text-xs font-semibold">{item.operation}</p>
-                            {item.fileName && <p className="text-[10px] truncate w-full">{item.fileName}</p>}
+          <section id="features" className="my-16 md:my-24">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
+                  Powerful AI Features
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {[
+                      { icon: <Sparkles size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
+                      { icon: <User size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
+                      { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
+                      { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
+                      { icon: <Maximize size={32} className="text-blue-400"/>, title: "Sharpen Image", description: "Enhance image clarity and bring out fine details for a crisper look." },
+                      { icon: <Scissors size={32} className="text-red-400"/>, title: "Background Removal", description: "Automatically remove the background from your photos with a single click." },
+                  ].map(feature => (
+                      <div key={feature.title} className="glass-card p-6 rounded-xl text-center flex flex-col items-center">
+                          <div className="p-3 rounded-full bg-[rgba(var(--primary-start-rgb),0.1)] mb-4 inline-block">
+                            {feature.icon}
                           </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <section id="features" className="my-16 md:my-24">
-                  <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
-                      Powerful AI Features
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {[
-                          { icon: <Sparkles size={32} className="text-[rgb(var(--primary-start-rgb))]"/>, title: "Super Resolution", description: "Upscale images up to 4x while preserving quality and adding fine details." },
-                          { icon: <User size={32} className="text-[rgb(var(--primary-mid-rgb))]"/>, title: "Face Enhancement", description: "Intelligently enhance facial features and skin texture with AI precision." },
-                          { icon: <Palette size={32} className="text-[rgb(var(--primary-end-rgb))]"/>, title: "Auto Colorization", description: "Bring black and white photos to life with realistic color restoration." },
-                          { icon: <Brush size={32} className="text-green-400"/>, title: "Scratch Removal", description: "Meticulously remove scratches, dust, and damages from old photos." },
-                          { icon: <Maximize size={32} className="text-blue-400"/>, title: "Sharpen Image", description: "Enhance image clarity and bring out fine details for a crisper look." },
-                          { icon: <Scissors size={32} className="text-red-400"/>, title: "Background Removal", description: "Automatically remove the background from your photos with a single click." },
-                      ].map(feature => (
-                          <div key={feature.title} className="glass-card p-6 rounded-xl text-center flex flex-col items-center">
-                              <div className="p-3 rounded-full bg-[rgba(var(--primary-start-rgb),0.1)] mb-4 inline-block">
-                                {feature.icon}
-                              </div>
-                              <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
-                              <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
-                          </div>
-                      ))}
-                  </div>
-              </section>
-              <AppFooter />
-            </main>
-        </SidebarInset>
-      </SidebarProvider>
-
+                          <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
+                          <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
+                      </div>
+                  ))}
+              </div>
+          </section>
+          
+      </main>
+      <AppFooter />
       <AlertDialog open={showLimitPopup} onOpenChange={setShowLimitPopup}>
         <AlertDialogContent className="glass-card !rounded-xl">
           <AlertDialogHeader>
@@ -831,3 +792,5 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
+    
