@@ -602,10 +602,10 @@ export default function PicShineAiPage() {
     })
   };
 
-  const ImageDisplay = ({ src, alt, placeholderText, 'data-ai-hint': aiHint, isLoading = false, loadingText = "Enhancing..." }: { src: string | null; alt: string; placeholderText: string; 'data-ai-hint'?: string, isLoading?: boolean, loadingText?: string }) => (
+  const ImageDisplay = ({ src, alt, placeholderText, isLoading = false, loadingText = "Enhancing..." }: { src: string | null; alt: string; placeholderText: string; isLoading?: boolean, loadingText?: string }) => (
     <div className="relative aspect-square bg-[rgba(var(--card-bg-rgb),0.3)] rounded-lg flex items-center justify-center overflow-hidden border border-[rgba(var(--card-border-rgb),0.15)] shadow-lg transition-all duration-300 hover:shadow-xl p-1">
       {src ? (
-        <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" data-ai-hint={aiHint} />
+        <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" />
       ) : (
         !isLoading && (
           <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
@@ -843,11 +843,11 @@ export default function PicShineAiPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start mt-10">
             <div className="space-y-3">
               <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original Image</h3>
-              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload or capture an image to see it here." data-ai-hint="uploaded old photo" />
+              <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload or capture an image to see it here." />
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Enhanced Image</h3>
-              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." data-ai-hint="restored photo" isLoading={isLoading} loadingText={loadingMessage} />
+              <ImageDisplay src={enhancedImage} alt="Enhanced" placeholderText="Your AI-enhanced image will appear here." isLoading={isLoading} loadingText={loadingMessage} />
             </div>
           </div>
 
@@ -910,25 +910,22 @@ export default function PicShineAiPage() {
                 {[
                     { 
                         image: 'https://placehold.co/600x400.png',
-                        'data-ai-hint': 'photography tips',
                         title: '5 Tips for Restoring Old Family Photos', 
                         excerpt: 'Learn how to breathe new life into your cherished memories with these simple yet effective AI-powered restoration techniques.' 
                     },
                     { 
                         image: 'https://placehold.co/600x400.png',
-                        'data-ai-hint': 'colorization history',
                         title: 'The Magic of AI Colorization: From B&W to Vivid', 
                         excerpt: 'Explore the technology behind turning black and white photos into vibrant color images and how PicShine AI makes it easy.' 
                     },
                     { 
                         image: 'https://placehold.co/600x400.png',
-                        'data-ai-hint': 'portrait photography',
                         title: 'Get Professional-Looking Portraits with AI', 
                         excerpt: 'You don’t need an expensive camera. Discover how to enhance facial features and create stunning portraits with just a few clicks.' 
                     },
                 ].map(post => (
                     <div key={post.title} className="glass-card overflow-hidden rounded-xl flex flex-col">
-                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover" data-ai-hint={post['data-ai-hint']} />
+                        <img src={post.image} alt={post.title} className="w-full h-48 object-cover" />
                         <div className="p-6 flex flex-col flex-grow">
                             <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{post.title}</h3>
                             <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{post.excerpt}</p>
