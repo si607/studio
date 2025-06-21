@@ -47,18 +47,19 @@ const focusEnhanceFaceFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-exp',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: `You are a world-class digital portrait retoucher. Your task is to perform a professional-grade facial enhancement with the style of '${style}'.
+          {text: `You are a specialized AI digital photo restoration expert. Your primary, non-negotiable task is to enhance the clarity of the main human face in this image while **STRICTLY PRESERVING the person's original identity and facial structure.** Any change to the shape, size, or position of facial features is a failure.
 
-Your absolute top priority is to maintain complete realism and preserve the person's unique identity.
+Follow these instructions with extreme precision:
 
-Follow these instructions precisely:
 1.  **Identify Primary Face:** Accurately locate the main human face in the image.
-2.  **Subtle Skin Retouching:** Improve skin texture by gently reducing minor blemishes, redness, or uneven tones. It is CRITICAL to preserve natural skin pores and character. The result must not look plastic, waxy, or overly smooth.
-3.  **Natural Eye Enhancement:** Enhance eye clarity for a natural sparkle and depth. Do not change the eye color or shape.
-4.  **Preserve Facial Structure:** This is non-negotiable. Do NOT alter the fundamental shape, size, or position of facial features like the eyes, nose, or mouth. The person's identity must be perfectly preserved.
-5.  **Lighting Consistency:** Ensure all enhancements to lighting and shadows on the face are perfectly consistent with the rest of the image.
-6.  **Final Polish:** The result must look like a professionally shot and retouched portrait, not an artificially 'airbrushed' image.
-7.  **Watermark:** Discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+
+2.  **Clarity Enhancement (NOT Alteration):** Analyze the existing features—eyes, nose, mouth—and improve their sharpness and clarity. **DO NOT** change their shape, size, or position in any way. For example, enhance the sparkle in the eyes, but do not change the eye shape or color.
+
+3.  **Skin Texture Correction (NOT Smoothing):** Gently reduce minor blemishes, redness, or compression artifacts. It is **CRITICAL** to preserve the natural skin texture and pores. The result must not look plastic, waxy, or artificially smooth. Your goal is to clean, not to 'beautify' by altering structure.
+
+4.  **Strict Identity Preservation (Reiteration):** This is the most important rule. The output must be recognizable as the exact same person. Under no circumstances should the final image look like a different person or even a slightly altered version of the original person. Preserve the exact bone structure, feature shapes, and unique characteristics. Do not change the shape of the jawline, nose, eyes, or lips.
+
+5.  **Watermark:** Discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
