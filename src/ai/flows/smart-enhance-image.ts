@@ -149,7 +149,7 @@ Execute the following steps with precision:
             (lowerMsg.includes("google ai") && lowerMsg.includes("failed")) ||
             lowerMsg.includes('internal server error') ||
             lowerMsg.includes('failed to fetch') ||
-            (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMsg.length < 300 && !originalMsg.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')) 
+            (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMessage.length < 300 && !originalMessage.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')) 
         ) {
              clientErrorMessage = `CRITICAL: Photo enhancement failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
         } else if (lowerMsg.includes('failed to fetch or process image from url')) {
