@@ -7,22 +7,26 @@ import {googleAI} from '@genkit-ai/googleai';
 // For production in Firebase App Hosting, GOOGLE_API_KEY needs to be set as a secure environment variable.
 const apiKey = process.env.GOOGLE_API_KEY;
 
+// Detailed check for the API key to provide better diagnostics in logs.
 if (!apiKey) {
   // This console error will appear in your Firebase Function logs if the key is missing or not accessible.
   console.error(
-    'CRITICAL GENKIT CONFIG ERROR: GOOGLE_API_KEY environment variable is NOT SET or EMPTY in the Firebase App Hosting environment. AI features WILL FAIL. Ensure this is set as a secure environment variable in your Firebase App Hosting configuration.'
+    'CRITICAL GENKIT CONFIG ERROR: The GOOGLE_API_KEY environment variable is NOT SET or is EMPTY. All AI features WILL FAIL.'
   );
-   console.log('Current process.env.GOOGLE_API_KEY value is undefined or empty.');
-   // To avoid logging too much, only log available keys if it seems like a common or critical issue might be at play.
-   // Consider enabling this detailed logging temporarily if GOOGLE_API_KEY is definitely set but still not working.
-   // console.log('All available process.env keys:', Object.keys(process.env).join(', '));
-
+  if (process.env.K_SERVICE) { // Heuristic for running in Google Cloud environment
+      console.error('This application appears to be running in a Google Cloud environment (App Hosting / Cloud Run).');
+      console.error('ACTION REQUIRED: You MUST set GOOGLE_API_KEY as a secret environment variable in your Firebase App Hosting configuration.');
+      console.error('See Firebase docs for "Add secrets to a web app".');
+  } else {
+      console.warn('This application does not appear to be in a Google Cloud environment. For local development, ensure you have a .env file with GOOGLE_API_KEY set.');
+  }
 } else {
   // Log a portion of the key to confirm it's being read by the application.
   // This helps verify that the environment variable is correctly propagated to the running application.
   console.log(
-    `Genkit initializing with GOOGLE_API_KEY. Provided key starts with: ${apiKey.substring(0, 10)}... and ends with ...${apiKey.substring(apiKey.length - 4)}. If AI features fail, CHECK FIREBASE FUNCTION LOGS for errors from Google AI related to this key (e.g., billing, permissions, model access).`
+    `Genkit initializing with GOOGLE_API_KEY. Key starts with: ${apiKey.substring(0, 4)}... and ends with ...${apiKey.substring(apiKey.length - 4)}.`
   );
+  console.log('If AI features fail with this key, CHECK FIREBASE FUNCTION LOGS for errors from the Google AI API related to this key (e.g., billing not enabled, API not enabled, permissions issues, or incorrect model name).');
 }
 
 export const ai = genkit({
@@ -31,7 +35,5 @@ export const ai = genkit({
       apiKey: apiKey, // Explicitly pass the API key
     }),
   ],
-  model: 'googleai/gemini-2.0-flash', // Default model for text, image generation uses gemini-2.0-flash-exp
+  model: 'googleai/gemini-2.0-flash', // Default model for text, image generation specifies its own model
 });
-
-    

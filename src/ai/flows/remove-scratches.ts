@@ -72,8 +72,20 @@ const removeScratchesFlow = ai.defineFlow(
         let clientErrorMessage = 'Scratch removal failed due to an unexpected server error. PLEASE CHECK SERVER LOGS (e.g., Firebase Function logs) for details like a Next.js error digest or Google AI API errors.';
         const lowerMsg = originalMessage.toLowerCase();
 
-        if (lowerMsg.includes("not available in your country") || lowerMsg.includes("image generation is not available in your country")) {
+        if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed') || lowerMsg.includes('api_key_not_valid')) {
+            clientErrorMessage = 'Scratch removal failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support. Ensure GOOGLE_API_KEY is correctly set as a secure environment variable in Firebase App Hosting.';
+        } else if (lowerMsg.includes('billing account not found') || lowerMsg.includes('billing') || lowerMsg.includes('project_not_linked_to_billing_account')) {
+             clientErrorMessage = 'Scratch removal failed: Billing account issue. Please check Firebase Function logs and contact support. Ensure your Google Cloud project has an active billing account.';
+        } else if (lowerMsg.includes('generative language api has not been used') || lowerMsg.includes('api is not enabled')) {
+             clientErrorMessage = 'Scratch removal failed: The Google Generative Language API is not enabled for your project or has not been used before. Please enable it in the Google Cloud Console and try again. Check Firebase Function logs for details.';
+        } else if (lowerMsg.includes("not available in your country") || lowerMsg.includes("image generation is not available in your country")) {
             clientErrorMessage = 'Scratch removal failed: This AI feature is not available in your current region/country. Please check Google Cloud service availability.';
+        } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
+             clientErrorMessage = 'Scratch removal failed: Service demand/quota limit reached. Please try again later. Check Firebase Function logs.';
+        } else if (lowerMsg.includes('blocked by safety setting') || lowerMsg.includes('safety policy violation')) {
+            clientErrorMessage = 'Scratch removal failed: Image blocked by content safety policy. Try a different image.';
+        } else if (lowerMsg.includes('ai model did not return an image')) {
+             clientErrorMessage = originalMessage; 
         } else if (originalMessage.startsWith('CRITICAL:') ||
             lowerMsg.includes('an error occurred in the server components render') || 
             (lowerMsg.includes("google ai") && lowerMsg.includes("failed")) ||
@@ -82,18 +94,6 @@ const removeScratchesFlow = ai.defineFlow(
             (lowerMsg.includes("<html") && !lowerMsg.includes("</html>") && originalMessage.length < 300 && !originalMessage.toLowerCase().includes('<html><head><meta name="robots" content="noindex"/></head><body>')) 
         ) {
              clientErrorMessage = `CRITICAL: Scratch removal failed due to a server-side configuration issue. YOU MUST CHECK YOUR FIREBASE FUNCTION LOGS for the detailed error digest. This is often related to Google AI API key, billing, or permissions in your production environment.`;
-        } else if (lowerMsg.includes('api key not valid') || lowerMsg.includes('permission denied') || lowerMsg.includes('authentication failed') || lowerMsg.includes('api_key_not_valid')) {
-            clientErrorMessage = 'Scratch removal failed: Server configuration error (API key, permissions). Please check Firebase Function logs and contact support. Ensure GOOGLE_API_KEY is correctly set as a secure environment variable in Firebase App Hosting.';
-        } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
-             clientErrorMessage = 'Scratch removal failed: Service demand/quota limit reached. Please try again later. Check Firebase Function logs.';
-        } else if (lowerMsg.includes('billing account not found') || lowerMsg.includes('billing') || lowerMsg.includes('project_not_linked_to_billing_account')) {
-             clientErrorMessage = 'Scratch removal failed: Billing account issue. Please check Firebase Function logs and contact support. Ensure your Google Cloud project has an active billing account.';
-        } else if (lowerMsg.includes('blocked by safety setting') || lowerMsg.includes('safety policy violation')) {
-            clientErrorMessage = 'Scratch removal failed: Image blocked by content safety policy. Try a different image.';
-        } else if (lowerMsg.includes('ai model did not return an image')) {
-             clientErrorMessage = originalMessage; 
-        } else if (lowerMsg.includes('generative language api has not been used') || lowerMsg.includes('api is not enabled')) {
-             clientErrorMessage = 'Scratch removal failed: The Google Generative Language API is not enabled for your project or has not been used before. Please enable it in the Google Cloud Console and try again. Check Firebase Function logs for details.';
         } else {
             const displayMessage = originalMessage.length < 200 ? originalMessage : 'See server logs for full details.';
             clientErrorMessage = `Scratch removal error: ${displayMessage} (Check Firebase Function logs for full details)`;
@@ -102,6 +102,3 @@ const removeScratchesFlow = ai.defineFlow(
       }
   }
 );
-    
-
-    
