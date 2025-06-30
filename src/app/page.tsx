@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper, Trash2 } from 'lucide-react';
 
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
@@ -96,6 +96,8 @@ export default function PicShineAiPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareApiAvailable, setIsShareApiAvailable] = useState(false);
+
+  const [showClearHistoryConfirm, setShowClearHistoryConfirm] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.share) {
@@ -580,6 +582,19 @@ export default function PicShineAiPage() {
         icon: <HistoryIcon className="h-5 w-5" />
     })
   };
+  
+  const handleClearHistory = () => {
+    setUserHistory([]);
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('picShineAiHistory');
+    }
+    setShowClearHistoryConfirm(false);
+    toast({
+      title: "History Cleared",
+      description: "Your enhancement history has been successfully deleted.",
+      icon: <Trash2 className="h-5 w-5" />
+    });
+  };
 
   const ImageDisplay = ({ src, alt, placeholderText, isLoading = false, loadingText = "Enhancing..." }: { src: string | null; alt: string; placeholderText: string; isLoading?: boolean, loadingText?: string }) => (
     <div className="relative aspect-square bg-[rgba(var(--card-bg-rgb),0.3)] rounded-lg flex items-center justify-center overflow-hidden border border-[rgba(var(--card-border-rgb),0.15)] shadow-lg transition-all duration-300 hover:shadow-xl p-1">
@@ -712,9 +727,21 @@ export default function PicShineAiPage() {
 
           {userHistory.length > 0 && (
             <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
-              <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] mb-6 flex items-center justify-center">
-                <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" /> Your Recent Enhancements
-              </h3>
+               <div className="flex justify-center items-center mb-6 relative">
+                 <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] flex items-center">
+                    <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" />
+                    Your Recent Enhancements
+                 </h3>
+                 <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowClearHistoryConfirm(true)}
+                    className="ml-4 text-[rgb(var(--muted-foreground))] hover:text-destructive hover:bg-destructive/10"
+                    aria-label="Clear history"
+                 >
+                    <Trash2 className="h-5 w-5" />
+                 </Button>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {userHistory.map((item) => (
                   <Card
@@ -789,8 +816,34 @@ export default function PicShineAiPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <AlertDialog open={showClearHistoryConfirm} onOpenChange={setShowClearHistoryConfirm}>
+        <AlertDialogContent className="glass-card !rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center text-[rgb(var(--foreground))]">
+              <AlertTriangle className="mr-2 h-6 w-6 text-yellow-400" />
+              Confirm Clear History
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[rgb(var(--muted-foreground))]">
+              Are you sure you want to delete your entire enhancement history? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel
+              onClick={() => setShowClearHistoryConfirm(false)}
+              className="bg-transparent border-[rgb(var(--muted-foreground))] text-[rgb(var(--muted-foreground))] hover:bg-[rgba(var(--muted-foreground),0.1)]"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearHistory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Yes, Clear History
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
-
-    
