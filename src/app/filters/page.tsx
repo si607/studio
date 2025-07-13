@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   UploadCloud,
@@ -253,7 +252,7 @@ export default function FiltersPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="h-60 w-full pr-4">
+                        <div className="h-60 w-full pr-4 overflow-y-auto">
                             <div className="space-y-4">
                                 {FILTERS.map(filter => (
                                     <div key={filter.name}>
@@ -262,7 +261,7 @@ export default function FiltersPage() {
                                     </div>
                                 ))}
                             </div>
-                        </ScrollArea>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -288,5 +287,3 @@ export default function FiltersPage() {
     </div>
   );
 }
-
-    
