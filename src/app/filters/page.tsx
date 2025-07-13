@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Image from 'next/image';
 import {
   UploadCloud,
   Sparkles,
@@ -20,16 +21,35 @@ import {
   Wand2,
 } from 'lucide-react';
 import { applyFilter } from '@/ai/flows/apply-filter';
+import { cn } from '@/lib/utils';
 
 const FILTERS = [
   // Photographic Styles
-  "Vintage Film", "Golden Hour", "Noir (Black & White)", "Infrared", "Cyanotype",
+  { name: "Vintage Film", hint: "vintage film" },
+  { name: "Golden Hour", hint: "golden hour" },
+  { name: "Noir", hint: "noir film" },
+  { name: "Infrared", hint: "infrared photo" },
+  { name: "Cyanotype", hint: "cyanotype print" },
   // Artistic Styles
-  "Watercolor Painting", "Oil Painting", "Pencil Sketch", "Charcoal Drawing", "Pop Art", "Impressionism",
+  { name: "Watercolor", hint: "watercolor painting" },
+  { name: "Oil Painting", hint: "oil painting" },
+  { name: "Pencil Sketch", hint: "pencil sketch" },
+  { name: "Charcoal Art", hint: "charcoal drawing" },
+  { name: "Pop Art", hint: "pop art" },
+  { name: "Impressionism", hint: "impressionist painting" },
   // Modern & Abstract Styles
-  "Neon Punk", "Holographic", "Glitch Art", "Double Exposure", "Origami World", "Stained Glass",
+  { name: "Neon Punk", hint: "neon punk" },
+  { name: "Holographic", hint: "holographic futuristic" },
+  { name: "Glitch Art", hint: "glitch art" },
+  { name: "Double Exposure", hint: "double exposure" },
+  { name: "Origami World", hint: "origami world" },
+  { name: "Stained Glass", hint: "stained glass" },
   // Fun & Whimsical Styles
-  "Cartoonize", "Pixel Art", "Toy Camera", "Fantasy Glow", "Dreamy Haze"
+  { name: "Cartoonize", hint: "cartoon style" },
+  { name: "Pixel Art", hint: "pixel art" },
+  { name: "Toy Camera", hint: "toy camera" },
+  { name: "Fantasy Glow", hint: "fantasy glow" },
+  { name: "Dreamy Haze", hint: "dreamy haze" }
 ];
 
 
@@ -38,7 +58,7 @@ export default function FiltersPage() {
   const [filteredImage, setFilteredImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
-  const [selectedFilter, setSelectedFilter] = useState<string>(FILTERS[0]);
+  const [selectedFilter, setSelectedFilter] = useState<string>(FILTERS[0].name);
   const [fileName, setFileName] = useState<string | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -207,17 +227,39 @@ export default function FiltersPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="w-full">
-                            <div className="flex space-x-3 pb-4">
+                       <ScrollArea className="w-full">
+                            <div className="flex space-x-4 pb-4">
                                 {FILTERS.map(filter => (
-                                    <Button
-                                        key={filter}
-                                        variant={selectedFilter === filter ? "default" : "outline"}
-                                        onClick={() => setSelectedFilter(filter)}
-                                        className={`shrink-0 ${selectedFilter === filter ? 'gradient-button' : ''}`}
+                                    <div
+                                        key={filter.name}
+                                        className="flex flex-col items-center gap-2 cursor-pointer group"
+                                        onClick={() => setSelectedFilter(filter.name)}
                                     >
-                                        {filter}
-                                    </Button>
+                                        <div className={cn(
+                                            "relative w-20 h-20 rounded-full overflow-hidden transition-all duration-300 border-2 border-transparent group-hover:scale-105",
+                                            selectedFilter === filter.name ? "border-[rgb(var(--primary-start-rgb))] ring-2 ring-offset-2 ring-offset-background ring-[rgb(var(--primary-start-rgb))]" : "border-[rgba(var(--card-border-rgb),0.2)]"
+                                        )}>
+                                            <Image
+                                                src={`https://placehold.co/100x100.png`}
+                                                alt={`${filter.name} preview`}
+                                                width={100}
+                                                height={100}
+                                                data-ai-hint={filter.hint}
+                                                className="object-cover w-full h-full"
+                                            />
+                                            {selectedFilter === filter.name && (
+                                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                  <CheckCircle2 className="text-white h-8 w-8" />
+                                              </div>
+                                            )}
+                                        </div>
+                                        <p className={cn(
+                                            "text-xs font-medium text-center transition-colors",
+                                            selectedFilter === filter.name ? "text-[rgb(var(--foreground))]" : "text-[rgb(var(--muted-foreground))] group-hover:text-[rgb(var(--foreground))]"
+                                        )}>
+                                            {filter.name}
+                                        </p>
+                                    </div>
                                 ))}
                             </div>
                             <ScrollBar orientation="horizontal" />
@@ -250,3 +292,5 @@ export default function FiltersPage() {
     </div>
   );
 }
+
+    
