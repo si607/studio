@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   UploadCloud,
   Sparkles,
@@ -18,37 +19,37 @@ import {
   CheckCircle2,
   ArrowLeft,
   Wand2,
+  Info,
 } from 'lucide-react';
 import { applyFilter } from '@/ai/flows/apply-filter';
-import { cn } from '@/lib/utils';
 
 const FILTERS = [
   // Photographic Styles
-  { name: "Vintage Film", hint: "vintage film" },
-  { name: "Golden Hour", hint: "golden hour" },
-  { name: "Noir", hint: "noir film" },
-  { name: "Infrared", hint: "infrared photo" },
-  { name: "Cyanotype", hint: "cyanotype print" },
+  { name: "Vintage Film", description: "Gives photos an old-school, classic film look with faded colors and grain." },
+  { name: "Golden Hour", description: "Bathes your photo in warm, soft, and glowing light, like just after sunrise." },
+  { name: "Noir", description: "Creates a dramatic black-and-white style with high contrast, inspired by classic mystery films." },
+  { name: "Infrared", description: "Simulates the look of infrared photography, often making foliage white and skies dark." },
+  { name: "Cyanotype", description: "Applies a historic photographic printing process that produces a rich cyan-blue print." },
   // Artistic Styles
-  { name: "Watercolor", hint: "watercolor painting" },
-  { name: "Oil Painting", hint: "oil painting" },
-  { name: "Pencil Sketch", hint: "pencil sketch" },
-  { name: "Charcoal Art", hint: "charcoal drawing" },
-  { name: "Pop Art", hint: "pop art" },
-  { name: "Impressionism", hint: "impressionist painting" },
+  { name: "Watercolor", description: "Transforms your image into a soft and vibrant watercolor painting." },
+  { name: "Oil Painting", description: "Re-renders the photo with the thick, textured strokes of an oil painting." },
+  { name: "Pencil Sketch", description: "Converts your photo into a detailed, hand-drawn pencil sketch." },
+  { name: "Charcoal Art", description: "Creates a bold and expressive charcoal drawing with deep blacks and smudged textures." },
+  { name: "Pop Art", description: "Applies a vibrant, high-contrast style inspired by the 1960s Pop Art movement." },
+  { name: "Impressionism", description: "Reimagines your photo with the small, thin brush strokes of Impressionist painters." },
   // Modern & Abstract Styles
-  { name: "Neon Punk", hint: "neon punk" },
-  { name: "Holographic", hint: "holographic futuristic" },
-  { name: "Glitch Art", hint: "glitch art" },
-  { name: "Double Exposure", hint: "double exposure" },
-  { name: "Origami World", hint: "origami world" },
-  { name: "Stained Glass", hint: "stained glass" },
+  { name: "Neon Punk", description: "Adds glowing neon lights and a futuristic, cyberpunk aesthetic to your image." },
+  { name: "Holographic", description: "Gives the photo a shimmery, rainbow-like, and futuristic holographic effect." },
+  { name: "Glitch Art", description: "Introduces digital errors and distortions for a modern, abstract tech look." },
+  { name: "Double Exposure", description: "Blends your photo with another image (often nature) to create an artistic composite." },
+  { name: "Origami World", description: "Reconstructs the scene as if it were made from folded paper origami." },
+  { name: "Stained Glass", description: "Redraws your image in the style of a colorful stained glass window." },
   // Fun & Whimsical Styles
-  { name: "Cartoonize", hint: "cartoon style" },
-  { name: "Pixel Art", hint: "pixel art" },
-  { name: "Toy Camera", hint: "toy camera" },
-  { name: "Fantasy Glow", hint: "fantasy glow" },
-  { name: "Dreamy Haze", hint: "dreamy haze" }
+  { name: "Cartoonize", description: "Turns your photo into a fun and playful cartoon or comic book illustration." },
+  { name: "Pixel Art", description: "Transforms your photo into retro 8-bit or 16-bit pixel art, like an old video game." },
+  { name: "Toy Camera", description: "Mimics the look of a cheap plastic toy camera, with vignetting and light leaks." },
+  { name: "Fantasy Glow", description: "Adds a magical and ethereal glow, perfect for creating a fantasy-like atmosphere." },
+  { name: "Dreamy Haze", description: "Applies a soft, hazy, and blurry effect to give the photo a dream-like quality." }
 ];
 
 
@@ -226,46 +227,42 @@ export default function FiltersPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                       <ScrollArea className="w-full">
-                            <div className="flex space-x-4 pb-4">
-                                {FILTERS.map(filter => (
-                                    <div
-                                        key={filter.name}
-                                        className="flex flex-col items-center gap-2 cursor-pointer group"
-                                        onClick={() => setSelectedFilter(filter.name)}
-                                    >
-                                        <div className={cn(
-                                            "relative w-20 h-20 rounded-full overflow-hidden transition-all duration-300 border-2 border-transparent group-hover:scale-105",
-                                            selectedFilter === filter.name ? "border-[rgb(var(--primary-start-rgb))] ring-2 ring-offset-2 ring-offset-background ring-[rgb(var(--primary-start-rgb))]" : "border-[rgba(var(--card-border-rgb),0.2)]"
-                                        )}>
-                                            <img
-                                                src={`https://placehold.co/100x100.png`}
-                                                alt={`${filter.name} preview`}
-                                                width={100}
-                                                height={100}
-                                                data-ai-hint={filter.hint}
-                                                className="object-cover w-full h-full"
-                                            />
-                                            {selectedFilter === filter.name && (
-                                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                  <CheckCircle2 className="text-white h-8 w-8" />
-                                              </div>
-                                            )}
-                                        </div>
-                                        <p className={cn(
-                                            "text-xs font-medium text-center transition-colors",
-                                            selectedFilter === filter.name ? "text-[rgb(var(--foreground))]" : "text-[rgb(var(--muted-foreground))] group-hover:text-[rgb(var(--foreground))]"
-                                        )}>
-                                            {filter.name}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
+                       <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select a filter" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {FILTERS.map(filter => (
+                              <SelectItem key={filter.name} value={filter.name}>
+                                {filter.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button onClick={handleApplyFilter} disabled={!originalImage || isLoading} className="gradient-button w-full mt-4">
                             <Sparkles className="mr-2 h-5 w-5" /> Apply Filter
                         </Button>
+                    </CardContent>
+                </Card>
+
+                <Card className="glass-card">
+                    <CardHeader>
+                        <CardTitle className="flex items-center text-xl">
+                           <Info className="mr-3 h-6 w-6 text-[rgb(var(--primary-start-rgb))]" />
+                            Filter Descriptions
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-60 w-full pr-4">
+                            <div className="space-y-4">
+                                {FILTERS.map(filter => (
+                                    <div key={filter.name}>
+                                        <p className="font-semibold text-[rgb(var(--foreground))]">{filter.name}</p>
+                                        <p className="text-sm text-[rgb(var(--muted-foreground))]">{filter.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
                     </CardContent>
                 </Card>
             </div>
@@ -291,5 +288,3 @@ export default function FiltersPage() {
     </div>
   );
 }
-
-    
