@@ -93,6 +93,15 @@ body {
   filter: brightness(1.1);
 }
 
+.gradient-text {
+  background: linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -101,5 +110,3 @@ body {
 .bg-primary-fallback {
   background-color: rgb(var(--primary-start-rgb));
 }
-
-    

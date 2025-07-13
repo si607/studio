@@ -192,7 +192,7 @@ export default function FiltersPage() {
                  <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                            <UploadCloud className="mr-3 h-6 w-6 text-primary" />
+                            <UploadCloud className="mr-3 h-6 w-6 gradient-text" />
                             1. Upload Your Photo
                         </CardTitle>
                     </CardHeader>
@@ -221,7 +221,7 @@ export default function FiltersPage() {
                  <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                            <Wand2 className="mr-3 h-6 w-6 text-primary" />
+                            <Wand2 className="mr-3 h-6 w-6 gradient-text" />
                             2. Choose a Filter
                         </CardTitle>
                     </CardHeader>
@@ -247,7 +247,7 @@ export default function FiltersPage() {
                 <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                           <Info className="mr-3 h-6 w-6 text-primary" />
+                           <Info className="mr-3 h-6 w-6 gradient-text" />
                             Filter Descriptions
                         </CardTitle>
                     </CardHeader>

@@ -645,7 +645,7 @@ export default function PicShineAiPage() {
           <Card className="glass-card w-full max-w-5xl mx-auto mb-12">
             <CardHeader>
                 <CardTitle className="flex items-center text-2xl">
-                <UploadCloud className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" />
+                <UploadCloud className="mr-3 h-7 w-7 gradient-text" />
                 Upload & Enhance Your Photo
                 </CardTitle>
             </CardHeader>
@@ -739,7 +739,7 @@ export default function PicShineAiPage() {
             <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
                <div className="flex justify-center items-center mb-6 relative">
                  <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] flex items-center">
-                    <HistoryIcon className="mr-3 h-7 w-7 text-[rgb(var(--primary-start-rgb))]" />
+                    <HistoryIcon className="mr-3 h-7 w-7 gradient-text" />
                     Your Recent Enhancements
                  </h3>
                  <Button
