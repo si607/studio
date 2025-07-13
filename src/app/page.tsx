@@ -629,7 +629,7 @@ export default function PicShineAiPage() {
                 Enhance Your Photos with AI
               </span>
             </h2>
-            <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto gradient-text">
               Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
             </p>
             <Link href="/filters" legacyBehavior>
@@ -857,3 +857,4 @@ export default function PicShineAiPage() {
     </div>
   );
 }
+
