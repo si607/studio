@@ -47,19 +47,14 @@ const focusEnhanceFaceFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: `You are a specialized AI digital photo restoration expert. Your primary, non-negotiable task is to enhance the clarity of the main human face in this image while **STRICTLY PRESERVING the person's original identity and facial structure.** Any change to the shape, size, or position of facial features is a failure.
+          {text: `You are an AI photo restoration expert. Your single, most important task is to enhance the clarity of the human face in this image while **strictly preserving the person's original identity and facial structure.**
 
-Follow these instructions with extreme precision:
-
-1.  **Identify Primary Face:** Accurately locate the main human face in the image.
-
-2.  **Clarity Enhancement (NOT Alteration):** Analyze the existing features—eyes, nose, mouth—and improve their sharpness and clarity. **DO NOT** change their shape, size, or position in any way. For example, enhance the sparkle in the eyes, but do not change the eye shape or color.
-
-3.  **Skin Texture Correction (NOT Smoothing):** Gently reduce minor blemishes, redness, or compression artifacts. It is **CRITICAL** to preserve the natural skin texture and pores. The result must not look plastic, waxy, or artificially smooth. Your goal is to clean, not to 'beautify' by altering structure.
-
-4.  **Strict Identity Preservation (Reiteration):** This is the most important rule. The output must be recognizable as the exact same person. Under no circumstances should the final image look like a different person or even a slightly altered version of the original person. Preserve the exact bone structure, feature shapes, and unique characteristics. Do not change the shape of the jawline, nose, eyes, or lips.
-
-5.  **Watermark:** Discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+Follow these critical instructions:
+1.  **Identify the main face.**
+2.  **Enhance Clarity ONLY:** Sharpen existing features like eyes and mouth. **DO NOT change their shape, size, or position.**
+3.  **Preserve Skin Texture:** Reduce minor blemishes but maintain natural skin texture. The result must NOT look plastic or artificially smooth.
+4.  **Identity is Paramount:** The output must be the exact same person. Do not alter bone structure, jawline, or any unique facial characteristics.
+5.  **No Watermarks:** Do not add any watermark or text to the image.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
@@ -95,7 +90,7 @@ Follow these instructions with extreme precision:
         } else if (lowerMsg.includes("not available in your country") || lowerMsg.includes("image generation is not available in your country")) {
             clientErrorMessage = 'Face-focused enhancement failed: This AI feature is not available in your current region/country. Please check Google Cloud service availability.';
         } else if (lowerMsg.includes('quota') || lowerMsg.includes('limit')) {
-             clientErrorMessage = 'Face-focused enhancement: Service demand/quota limit reached. Try again later. Check Firebase Function logs.';
+             clientErrorMessage = 'Face-focused enhancement: Service demand is high or your project quota limit has been reached. Please try again in a few moments. If the problem persists, check your Google Cloud project quotas in the console. See server logs for more details.';
         } else if (lowerMsg.includes('blocked by safety setting') || lowerMsg.includes('safety policy violation')) {
             clientErrorMessage = 'Face-focused enhancement: Image blocked by content safety policy. Try a different image.';
         } else if (lowerMsg.includes('ai model did not return an image')) {
