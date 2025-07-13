@@ -35,7 +35,7 @@ body {
     --primary-start-rgb: 77, 61, 244;
     --primary-mid-rgb: 171, 63, 251;
     --primary-end-rgb: 30, 144, 255;
-    --primary-text: 255, 255, 255;
+    --primary-text-rgb: 255, 255, 255;
   }
  
   .dark {
@@ -81,7 +81,7 @@ body {
 
 .gradient-button {
   background: linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)));
-  color: rgb(var(--primary-text));
+  color: rgb(var(--primary-text-rgb));
   background-size: 200% 200%;
   animation: gradientShift 4s ease infinite;
   @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
