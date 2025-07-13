@@ -2,13 +2,14 @@
 "use client";
 
 import React, { useState, ChangeEvent, useRef, useEffect, DragEvent, useCallback } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper, Trash2 } from 'lucide-react';
+import { UploadCloud, Sparkles, RotateCcw, Loader2, Image as ImageIcon, Download, Palette, Brush, History as HistoryIcon, Crown, AlertTriangle, AlertCircle, Info, CheckCircle2, Layers, Settings2, ShieldCheck, Zap, Camera, Share2, User, FileText, BookOpen, Maximize, Scissors, Newspaper, Trash2, Wand2 } from 'lucide-react';
 
 import { smartEnhanceImage } from '@/ai/flows/smart-enhance-image';
 import { colorizeImage } from '@/ai/flows/colorize-image';
@@ -48,6 +49,7 @@ const AppFooter = () => (
           <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Product</h4>
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
             <li><a href="#features" className="hover:text-[rgb(var(--foreground))] transition-colors">Features</a></li>
+            <li><Link href="/filters" className="hover:text-[rgb(var(--foreground))] transition-colors">AI Filters</Link></li>
             <li><a href="#pricing" className="hover:text-[rgb(var(--foreground))] transition-colors">Pricing</a></li>
             <li><a href="#" className="hover:text-[rgb(var(--foreground))] transition-colors">API</a></li>
           </ul>
@@ -630,6 +632,14 @@ export default function PicShineAiPage() {
             <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
               Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
             </p>
+            <Link href="/filters" legacyBehavior>
+                <a className="inline-block">
+                    <Button size="lg" className="gradient-button text-base font-bold">
+                        <Wand2 className="mr-3" />
+                        Try our new AI Filters Studio
+                    </Button>
+                </a>
+            </Link>
           </section>
 
           <Card className="glass-card w-full max-w-5xl mx-auto mb-12">
