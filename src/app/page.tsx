@@ -38,15 +38,15 @@ const AppFooter = () => (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         <div>
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-primary-fallback rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4D3DF4 0%, #AB3FFB 50%, #1E90FF 100%)'}}>
+            <div className="w-8 h-8 bg-primary-fallback rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
               <Sparkles size={18} className="text-white" />
             </div>
-            <span className="text-lg font-bold text-[rgb(var(--foreground))]">PicShine AI</span>
+            <span className="text-lg font-bold gradient-text">PicShine AI</span>
           </div>
           <p className="text-[rgb(var(--muted-foreground))] text-sm">Transform your photos with cutting-edge AI technology.</p>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Product</h4>
+          <h4 className="font-semibold mb-3 gradient-text">Product</h4>
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
             <li><a href="#features" className="hover:text-[rgb(var(--foreground))] transition-colors">Features</a></li>
             <li><Link href="/filters" className="hover:text-[rgb(var(--foreground))] transition-colors">AI Filters</Link></li>
@@ -55,7 +55,7 @@ const AppFooter = () => (
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Legal & Support</h4>
+          <h4 className="font-semibold mb-3 gradient-text">Legal & Support</h4>
           <ul className="space-y-2 text-sm text-[rgb(var(--muted-foreground))]">
             <li><a href="/privacy-policy" className="hover:text-[rgb(var(--foreground))] transition-colors flex items-center"><FileText size={14} className="mr-2" /> Privacy Policy</a></li>
             <li><a href="/terms-of-service" className="hover:text-[rgb(var(--foreground))] transition-colors flex items-center"><BookOpen size={14} className="mr-2" /> Terms of Service</a></li>
@@ -65,7 +65,7 @@ const AppFooter = () => (
           </ul>
         </div>
         <div>
-          <h4 className="font-semibold mb-3 text-[rgb(var(--foreground))]">Connect</h4>
+          <h4 className="font-semibold mb-3 gradient-text">Connect</h4>
            <p className="text-[rgb(var(--muted-foreground))] text-sm">Social links (TBD)</p>
         </div>
       </div>
@@ -604,9 +604,9 @@ export default function PicShineAiPage() {
         <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" />
       ) : (
         !isLoading && (
-          <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
-            <ImageIcon size={48} className="mb-2 opacity-50" />
-            <p>{placeholderText}</p>
+          <div className="flex flex-col items-center p-4 text-center">
+            <ImageIcon size={48} className="mb-2 opacity-50 text-[rgb(var(--muted-foreground))]" />
+            <p className="text-[rgb(var(--muted-foreground))]">{placeholderText}</p>
           </div>
         )
       )}
@@ -620,16 +620,16 @@ export default function PicShineAiPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-[rgb(var(--foreground))]">
+    <div className="min-h-screen bg-background text-foreground">
       <canvas ref={canvasRef} className="hidden"></canvas>
       <main className="container mx-auto px-4 py-8 max-w-7xl flex-grow">
           <section id="home" className="text-center my-12 md:my-16">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
-              <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
+              <span className="gradient-text">
                 Enhance Your Photos with AI
               </span>
             </h2>
-            <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto gradient-text">
+            <p className="text-lg md:text-xl text-[rgb(var(--muted-foreground))] mb-8 max-w-3xl mx-auto">
               Transform your images with cutting-edge AI technology. Super-resolution, face enhancement, colorization, and more, effortlessly.
             </p>
             <Link href="/filters" legacyBehavior>
@@ -738,9 +738,9 @@ export default function PicShineAiPage() {
           {userHistory.length > 0 && (
             <div className="mt-12 pt-8 border-t border-[rgba(var(--card-border-rgb),0.15)]">
                <div className="flex justify-center items-center mb-6 relative">
-                 <h3 className="text-2xl font-semibold text-center text-[rgb(var(--foreground))] flex items-center">
+                 <h3 className="text-2xl font-semibold text-center flex items-center">
                     <HistoryIcon className="mr-3 h-7 w-7 gradient-text" />
-                    Your Recent Enhancements
+                    <span className="gradient-text">Your Recent Enhancements</span>
                  </h3>
                  <Button
                     variant="ghost"
@@ -774,7 +774,7 @@ export default function PicShineAiPage() {
           )}
 
           <section id="features" className="my-16 md:my-24">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-[rgb(var(--foreground))]">
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 gradient-text">
                   Powerful AI Features
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -790,7 +790,7 @@ export default function PicShineAiPage() {
                           <div className="p-3 rounded-full bg-[rgba(var(--primary-start-rgb),0.1)] mb-4 inline-block">
                             {feature.icon}
                           </div>
-                          <h3 className="text-xl font-semibold mb-3 text-[rgb(var(--foreground))]">{feature.title}</h3>
+                          <h3 className="text-xl font-semibold mb-3 gradient-text">{feature.title}</h3>
                           <p className="text-[rgb(var(--muted-foreground))] text-sm flex-grow">{feature.description}</p>
                       </div>
                   ))}
@@ -857,4 +857,3 @@ export default function PicShineAiPage() {
     </div>
   );
 }
-
