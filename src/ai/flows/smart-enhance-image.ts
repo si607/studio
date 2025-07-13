@@ -103,7 +103,7 @@ Execute the following steps with precision:
 
 6.  **Natural Facial Enhancement (If Applicable):** If human faces are present, apply subtle, professional retouching. Enhance eye clarity and **improve skin texture by cleaning imperfections, but you MUST preserve the natural skin texture and pores**. Do not make features look fake or change their fundamental structure.
 
-7.  **Watermark:** After all enhancements are complete, discreetly incorporate a very small, semi-transparent "PicShine AI" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space.`},
+7. **No Watermarks:** Do not add any watermark or text to the image.`},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],

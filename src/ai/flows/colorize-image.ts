@@ -46,7 +46,7 @@ const colorizeImageFlow = ai.defineFlow(
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: input.photoDataUri}},
-          {text: "Your task is professional, photorealistic colorization. Analyze the context (era, objects, lighting) of this black and white image to apply historically and physically accurate colors. The result must be rich, vibrant, and natural, with realistic skin tones, deep contrast, and subtle gradients. Avoid flat colors or an artificial 'painted' look. The final image should look like a high-quality photograph originally shot in color. Also, discreetly incorporate a very small, semi-transparent \"PicShine AI\" watermark in one of the bottom corners of the image. Ensure it is unobtrusive and occupies minimal space."},
+          {text: "You are an AI photo colorization expert. Your single, most important task is to apply historically and physically accurate colors to this black and white image while **strictly preserving the original subject's identity and facial structure.**\n\nFollow these critical instructions:\n1.  **Analyze Context:** Analyze the context (era, objects, lighting) to apply accurate colors.\n2.  **Realistic Tones:** The result must be rich, vibrant, and natural, with realistic skin tones, deep contrast, and subtle gradients. Avoid flat colors or an artificial 'painted' look.\n3.  **Identity is Paramount:** The output must be the exact same person. Do not alter bone structure, jawline, or any unique facial characteristics.\n4.  **No Watermarks:** Do not add any watermark or text to the image."},
         ],
         config: {
           responseModalities: ['TEXT', 'IMAGE'],
