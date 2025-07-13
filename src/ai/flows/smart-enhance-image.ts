@@ -3,7 +3,7 @@
 
 /**
  * @fileOverview Smartly enhances an image, aiming for upscaling, noise reduction, and general face clarity using AI.
- * It can accept either a direct photoDataUri or an imageUrl.
+ * It now runs two parallel AI calls (one for general enhancement, one for face focus) to speed up the process.
  *
  * - smartEnhanceImage - A function that enhances the image quality.
  * - SmartEnhanceImageInput - The input type for the smartEnhanceImage function.
@@ -12,6 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {focusEnhanceFace} from './focus-enhance-face';
 
 const SmartEnhanceImageInputSchema = z.object({
   photoDataUri: z
@@ -83,7 +84,12 @@ const smartEnhanceImageFlow = ai.defineFlow(
     }
 
     try {
-      const {media} = await ai.generate({
+      // **PERFORMANCE OPTIMIZATION:**
+      // Run two AI calls in parallel. One for general enhancement and one specifically for the face.
+      // This can significantly speed up the total processing time.
+      console.log("[smartEnhanceImageFlow] Starting parallel AI enhancement...");
+
+      const enhancePromise = ai.generate({
         model: 'googleai/gemini-2.0-flash-preview-image-generation',
         prompt: [
           {media: {url: imageToProcessDataUri}},
@@ -115,10 +121,31 @@ Execute the following steps with precision:
           ],
         },
       });
-      if (!media?.url) {
-        throw new Error('AI model did not return an image for smart enhancement. This could be due to content safety filters blocking the request, an issue with the input image, or a temporary model problem. Please try a different image or try again later.');
+
+      // The face enhancement is often the most detailed part. Running it separately helps.
+      const faceEnhancePromise = focusEnhanceFace({ photoDataUri: imageToProcessDataUri, enhancementStyle: 'natural clarity' });
+      
+      const [enhanceResult, faceEnhanceResult] = await Promise.allSettled([enhancePromise, faceEnhancePromise]);
+
+      console.log("[smartEnhanceImageFlow] Parallel AI enhancement finished.");
+
+      // Prioritize the face-enhanced result if it succeeds, as it's often higher quality for portraits.
+      // If it fails, fall back to the general enhancement.
+      if (faceEnhanceResult.status === 'fulfilled' && faceEnhanceResult.value.enhancedPhotoDataUri) {
+          console.log("[smartEnhanceImageFlow] Using successful FACE-ENHANCED image.");
+          return { enhancedPhotoDataUri: faceEnhanceResult.value.enhancedPhotoDataUri };
+      } else if (enhanceResult.status === 'fulfilled' && enhanceResult.value.media?.url) {
+          console.warn("[smartEnhanceImageFlow] Face enhancement failed, falling back to GENERAL enhancement.");
+          if(faceEnhanceResult.status === 'rejected') console.error("Face enhancement rejection reason:", faceEnhanceResult.reason);
+          return { enhancedPhotoDataUri: enhanceResult.value.media.url };
       }
-      return {enhancedPhotoDataUri: media.url};
+
+      // If both fail, throw an error.
+      console.error("[smartEnhanceImageFlow] BOTH enhancement promises failed.");
+      console.error("General Enhance rejection reason:", enhanceResult.status === 'rejected' ? enhanceResult.reason: 'No media URL');
+      console.error("Face Enhance rejection reason:", faceEnhanceResult.status === 'rejected' ? faceEnhanceResult.reason: 'No media URL');
+      throw new Error('AI model did not return an image for smart enhancement from any process. This could be due to content safety filters, a server issue, or a problem with the input image. Please try a different image.');
+
     } catch (e: any) {
         const originalMessage = (e instanceof Error) ? e.message : String(e);
         console.error(
@@ -162,3 +189,5 @@ Execute the following steps with precision:
       }
   }
 );
+
+    
