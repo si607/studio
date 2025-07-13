@@ -153,7 +153,7 @@ export default function FiltersPage() {
         <img src={src} alt={alt} className="max-h-full max-w-full object-contain rounded-md" />
       ) : (
         !isLoading && (
-          <div className="flex flex-col items-center text-[rgb(var(--muted-foreground))] p-4 text-center">
+          <div className="flex flex-col items-center text-muted-foreground p-4 text-center">
             <ImageIcon size={48} className="mb-2 opacity-50" />
             <p>{placeholderText}</p>
           </div>
@@ -161,7 +161,7 @@ export default function FiltersPage() {
       )}
       {isLoading && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white z-10">
-          <Loader2 className="h-10 w-10 animate-spin text-[rgb(var(--primary-start-rgb))]" />
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="mt-4 text-center text-sm font-medium px-4">{loadingText}</p>
         </div>
       )}
@@ -169,20 +169,20 @@ export default function FiltersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-[rgb(var(--foreground))]">
+    <div className="min-h-screen bg-background text-foreground">
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <header className="flex items-center justify-between mb-8">
             <Link href="/" legacyBehavior>
-                <a className="flex items-center gap-2 text-sm text-[rgb(var(--muted-foreground))] hover:text-[rgb(var(--foreground))] transition-colors">
+                <a className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
                     <ArrowLeft size={16} />
                     Back to Main Enhancer
                 </a>
             </Link>
              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary-fallback rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4D3DF4 0%, #AB3FFB 50%, #1E90FF 100%)'}}>
+                <div className="w-8 h-8 bg-primary-fallback rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)))'}}>
                     <Wand2 size={18} className="text-white" />
                 </div>
-                <span className="text-lg font-bold text-[rgb(var(--foreground))]">PicShine AI Filters Studio</span>
+                <span className="text-lg font-bold text-foreground">PicShine AI Filters Studio</span>
             </div>
             <div></div>
         </header>
@@ -193,7 +193,7 @@ export default function FiltersPage() {
                  <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                            <UploadCloud className="mr-3 h-6 w-6 text-[rgb(var(--primary-start-rgb))]" />
+                            <UploadCloud className="mr-3 h-6 w-6 text-primary" />
                             1. Upload Your Photo
                         </CardTitle>
                     </CardHeader>
@@ -201,18 +201,18 @@ export default function FiltersPage() {
                         <label
                             htmlFor="imageUpload"
                             className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer transition-colors
-                                ${isDragging ? 'border-[rgb(var(--primary-start-rgb))] bg-[rgba(var(--primary-start-rgb),0.1)]' : 'border-[rgba(var(--card-border-rgb),0.2)] hover:border-[rgba(var(--primary-start-rgb),0.5)]'}
-                                bg-[rgba(var(--card-bg-rgb),0.2)]`}
+                                ${isDragging ? 'border-primary bg-primary/10' : 'border-border/20 hover:border-primary/50'}
+                                bg-background/20`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                         >
                             <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center">
-                                <UploadCloud className="w-8 h-8 mb-3 text-[rgb(var(--muted-foreground))]" />
-                                <p className="mb-2 text-sm text-[rgb(var(--muted-foreground))]">
-                                    <span className="font-semibold text-[rgb(var(--foreground))]">Click to upload</span> or drag
+                                <UploadCloud className="w-8 h-8 mb-3 text-muted-foreground" />
+                                <p className="mb-2 text-sm text-muted-foreground">
+                                    <span className="font-semibold text-foreground">Click to upload</span> or drag
                                 </p>
-                                <p className="text-xs text-[rgb(var(--muted-foreground))]">{fileName || "PNG, JPG, WEBP"}</p>
+                                <p className="text-xs text-muted-foreground">{fileName || "PNG, JPG, WEBP"}</p>
                             </div>
                             <Input id="imageUpload" type="file" className="hidden" accept="image/*" onChange={handleFileInputChange} ref={fileInputRef} />
                         </label>
@@ -222,7 +222,7 @@ export default function FiltersPage() {
                  <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                            <Wand2 className="mr-3 h-6 w-6 text-[rgb(var(--primary-start-rgb))]" />
+                            <Wand2 className="mr-3 h-6 w-6 text-primary" />
                             2. Choose a Filter
                         </CardTitle>
                     </CardHeader>
@@ -248,7 +248,7 @@ export default function FiltersPage() {
                 <Card className="glass-card">
                     <CardHeader>
                         <CardTitle className="flex items-center text-xl">
-                           <Info className="mr-3 h-6 w-6 text-[rgb(var(--primary-start-rgb))]" />
+                           <Info className="mr-3 h-6 w-6 text-primary" />
                             Filter Descriptions
                         </CardTitle>
                     </CardHeader>
@@ -257,8 +257,8 @@ export default function FiltersPage() {
                             <div className="space-y-4">
                                 {FILTERS.map(filter => (
                                     <div key={filter.name}>
-                                        <p className="font-semibold text-[rgb(var(--foreground))]">{filter.name}</p>
-                                        <p className="text-sm text-[rgb(var(--muted-foreground))]">{filter.description}</p>
+                                        <p className="font-semibold text-foreground">{filter.name}</p>
+                                        <p className="text-sm text-muted-foreground">{filter.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -270,11 +270,11 @@ export default function FiltersPage() {
             {/* Right Column: Image Previews */}
             <div className="space-y-6">
                 <div className="space-y-2">
-                     <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Original</h3>
+                     <h3 className="text-xl font-semibold text-center text-foreground">Original</h3>
                      <ImageDisplay src={originalImage} alt="Original" placeholderText="Upload an image to start" />
                 </div>
                  <div className="space-y-2">
-                     <h3 className="text-xl font-semibold text-center text-[rgb(var(--foreground))]">Filtered Image</h3>
+                     <h3 className="text-xl font-semibold text-center text-foreground">Filtered Image</h3>
                      <ImageDisplay src={filteredImage} alt="Filtered" placeholderText="Your filtered image will appear here" isLoading={isLoading} loadingText={loadingMessage} />
                 </div>
                 {filteredImage && (
@@ -288,3 +288,5 @@ export default function FiltersPage() {
     </div>
   );
 }
+
+    

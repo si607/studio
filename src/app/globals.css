@@ -9,86 +9,55 @@ body {
 
 @layer base {
   :root {
-    /* Dark Theme Inspired by User HTML */
-    --background-start-rgb: 14, 14, 18; /* #0E0E12 */
-    --background-end-rgb: 26, 26, 38;   /* #1A1A26 */
-    --background: linear-gradient(135deg, rgb(var(--background-start-rgb)) 0%, rgb(var(--background-end-rgb)) 100%);
-    --foreground: 229, 231, 235; /* #E5E7EB */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --radius: 0.75rem;
 
-    --card-bg-rgb: 26, 26, 38; /* #1A1A26 */
-    --card-bg-alpha: 0.7;
-    --card-border-rgb: 255, 255, 255;
-    --card-border-alpha: 0.1;
-    --card: rgba(var(--card-bg-rgb), var(--card-bg-alpha));
-    --card-foreground: var(--foreground);
-
-    --popover: rgba(var(--card-bg-rgb), 0.95);
-    --popover-foreground: var(--foreground);
-
-    /* Primary Gradient - for buttons and accents */
-    --primary-start-rgb: 77, 61, 244;  /* #4D3DF4 */
-    --primary-mid-rgb: 171, 63, 251; /* #AB3FFB */
-    --primary-end-rgb: 30, 144, 255; /* #1E90FF */
-    --primary: linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)));
-    --primary-text: 255, 255, 255; /* White text on gradient */
-    --primary-foreground: rgb(var(--primary-text));
-
-
-    --secondary: 55, 65, 81; /* #374151 - A darker gray for secondary elements */
-    --secondary-foreground: var(--foreground);
-
-    --muted: 75, 85, 99; /* #4B5563 - Muted text or elements */
-    --muted-foreground: 156, 163, 175; /* #9CA3AF */
-
-    --accent: rgb(var(--primary-mid-rgb)); /* Using mid color of primary gradient */
-    --accent-foreground: var(--foreground);
-
-    --destructive: 239, 68, 68; /* #EF4444 - Red for errors */
-    --destructive-foreground: var(--primary-text);
-
-    --border: rgba(var(--card-border-rgb), var(--card-border-alpha));
-    --input: rgba(var(--card-bg-rgb), 0.5); /* Semi-transparent input background */
-    --input-border: rgba(var(--card-border-rgb), 0.2);
-    --ring: rgb(var(--primary-start-rgb));
-
-    --radius: 0.75rem; /* From previous theme, can be adjusted */
-
-    /* Specific component colors based on new theme */
-    --toast-bg: rgba(var(--card-bg-rgb), 0.9);
-    --toast-border: rgb(var(--primary-start-rgb));
-
-     /* Chart colors (can be updated if charts are used) */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --background-start-rgb: 14, 14, 18; /* For gradient compatibility */
+    --background-end-rgb: 26, 26, 38;
+    --primary-start-rgb: 77, 61, 244;
+    --primary-mid-rgb: 171, 63, 251;
+    --primary-end-rgb: 30, 144, 255;
+    --primary-text: 255, 255, 255;
   }
-
-  /* Fallback for non-gradient backgrounds if needed */
-  .bg-primary-fallback {
-    background-color: rgb(var(--primary-start-rgb));
-  }
-
-
-  /* Light mode (basic setup, can be expanded based on user's HTML light mode) */
-  .light {
-    --background-start-rgb: 248, 250, 252; /* #f8fafc */
-    --background-end-rgb: 226, 232, 240;   /* #e2e8f0 */
-    --foreground: 31, 41, 55; /* #1f2937 */
-
-    --card-bg-rgb: 255, 255, 255;
-    --card-bg-alpha: 0.8;
-    --card-border-rgb: 0,0,0;
-    --card-border-alpha: 0.1;
-    
-    --popover: rgba(var(--card-bg-rgb), 0.95);
-    --secondary: 243, 244, 246; /* #F3F4F6 */
-    --muted: 229, 231, 235; /* #E5E7EB */
-    --muted-foreground: 107, 114, 128; /* #6B7283 */
-    --input: rgb(var(--card-bg-rgb));
-    --input-border: rgba(var(--card-border-rgb), 0.2);
-    --toast-bg: rgba(var(--card-bg-rgb), 0.9);
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
@@ -97,21 +66,21 @@ body {
     @apply border-border;
   }
   body {
-    background: var(--background);
-    color: rgb(var(--foreground));
+    background: linear-gradient(135deg, rgb(var(--background-start-rgb)) 0%, rgb(var(--background-end-rgb)) 100%);
+    color: hsl(var(--foreground));
     min-height: 100vh;
-    overflow-x: hidden; /* Prevent accidental horizontal scroll on mobile */
+    overflow-x: hidden;
   }
 }
 
 /* Custom Styles for Glass Card and Gradient Button */
 .glass-card {
-  background: var(--card);
+  background: hsla(var(--card), 0.7);
   @apply backdrop-blur-xl border rounded-2xl shadow-2xl;
 }
 
 .gradient-button {
-  background: var(--primary);
+  background: linear-gradient(45deg, rgb(var(--primary-start-rgb)), rgb(var(--primary-mid-rgb)), rgb(var(--primary-end-rgb)));
   color: rgb(var(--primary-text));
   background-size: 200% 200%;
   animation: gradientShift 4s ease infinite;
@@ -128,3 +97,9 @@ body {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
 }
+
+.bg-primary-fallback {
+  background-color: rgb(var(--primary-start-rgb));
+}
+
+    

@@ -18,42 +18,39 @@ export default {
       colors: {
         // Theme variables will be primarily driven by globals.css
         // These are fallbacks or can be used if needed directly
-        background: 'var(--background)', // This will be a gradient
-        foreground: 'rgb(var(--foreground))',
-        card: {
-          DEFAULT: 'var(--card)', // This will be rgba with blur
-          foreground: 'rgb(var(--card-foreground))',
-        },
-        popover: {
-          DEFAULT: 'var(--popover)',
-          foreground: 'rgb(var(--popover-foreground))',
-        },
-        primary: { // For solid primary color if not using gradient
-          DEFAULT: 'var(--primary)', 
-          foreground: 'rgb(var(--primary-text))',
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
-          DEFAULT: 'rgb(var(--secondary))',
-          foreground: 'rgb(var(--secondary-foreground))',
-        },
-        muted: {
-          DEFAULT: 'rgb(var(--muted))',
-          foreground: 'rgb(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'var(--accent)', 
-          foreground: 'rgb(var(--accent-foreground))', 
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
-          DEFAULT: 'rgb(var(--destructive))',
-          foreground: 'rgb(var(--destructive-foreground))',
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
         },
-        border: 'var(--border)',
-        input: {
-          DEFAULT: 'var(--input)',
-          border: 'var(--input-border)',
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
         },
-        ring: 'rgb(var(--ring))',
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
@@ -97,3 +94,4 @@ export default {
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
 
+    
