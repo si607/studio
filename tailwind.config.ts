@@ -29,7 +29,7 @@ export default {
           foreground: 'rgb(var(--popover-foreground))',
         },
         primary: { // For solid primary color if not using gradient
-          DEFAULT: 'rgb(var(--primary-start-rgb))', 
+          DEFAULT: 'var(--primary)', 
           foreground: 'rgb(var(--primary-text))',
         },
         secondary: {
@@ -41,7 +41,7 @@ export default {
           foreground: 'rgb(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: 'rgb(var(--accent))', 
+          DEFAULT: 'var(--accent)', 
           foreground: 'rgb(var(--accent-foreground))', 
         },
         destructive: {
@@ -96,3 +96,4 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
