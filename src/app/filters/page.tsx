@@ -8,7 +8,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Image from 'next/image';
 import {
   UploadCloud,
   Sparkles,
@@ -239,7 +238,7 @@ export default function FiltersPage() {
                                             "relative w-20 h-20 rounded-full overflow-hidden transition-all duration-300 border-2 border-transparent group-hover:scale-105",
                                             selectedFilter === filter.name ? "border-[rgb(var(--primary-start-rgb))] ring-2 ring-offset-2 ring-offset-background ring-[rgb(var(--primary-start-rgb))]" : "border-[rgba(var(--card-border-rgb),0.2)]"
                                         )}>
-                                            <Image
+                                            <img
                                                 src={`https://placehold.co/100x100.png`}
                                                 alt={`${filter.name} preview`}
                                                 width={100}
